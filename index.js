@@ -265,26 +265,18 @@ app.post("/api/generate-weekly-report", async (req, res) => {
         // 2. Build Tiered Prompt
         let prompt = "";
         if (isPremium) {
-            prompt = `You are a Board-Certified Veterinary Clinical Chief. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
+            prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
 Pet Profile: ${JSON.stringify(petContext)}
 Daily Logs (7 days): ${JSON.stringify(logs)}
-Food Scanner Data (Photos): ${JSON.stringify(scans)}
+Food Scanner Data: ${JSON.stringify(scans)}
 Recent Chat Context: ${JSON.stringify(chatHistory)}
 
-Requirements:
-1. Write a detailed, comprehensive report containing at least 3 distinct paragraphs.
-2. Paragraph 1 - Clinical Telemetry & Vitals: Analyze energy, appetite, and mood trends. Use professional clinical jargon (e.g., lethargy, anorexia, behavioral baseline, vital stability).
-3. Paragraph 2 - Nutritional & Dietary Analysis: Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg). Always use KG.
-4. Paragraph 3 - Behavioral Insights & Proactive Recommendations: Based on the chat history and logs, provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
-5. Maintain a highly professional, authoritative, yet empathetic tone. Format cleanly without excessive bolding or markdown. Write in English or the user's native language if evident.`;
-        } else {
-            prompt = `You are a casual pet assistant. Write a VERY SHORT summary (max 2 sentences) for ${petContext.name} based on these recent logs: ${JSON.stringify(logs)}.
-            
-        CRITICAL RULES:
-        1. Acknowledge the actual metrics (e.g., if Energy is Low, suggest rest).
-        2. DO NOT use technical medical terms.
-        3. DO NOT include any "Upgrade" or "AI+" call to action in the text itself.
-        4. Keep it friendly and concise.`;
+STRICT REQUIREMENTS FOR AI:
+1. FORMAT: Write EXACTLY 3 distinct paragraphs. You MUST use "\n\n" between paragraphs to ensure proper formatting on the frontend. Do NOT output a single block of text. Minimum 150 words total.
+2. PARAGRAPH 1 (Vitals): Analyze energy, appetite, and mood trends. Use strict clinical terminology (e.g., lethargy, anorexia, behavioral baseline, vital stability). Do not use emojis.
+3. PARAGRAPH 2 (Nutrition): Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg).
+4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
+5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
         }
 
         const result = await Promise.race([
