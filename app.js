@@ -2,10 +2,7 @@
 // ==========================================
 // BACKEND CONFIGURATION
 // ==========================================
-const API_BASE = (window.location.port !== '3000')
-    ? (window.location.protocol + '//' + window.location.hostname + ':3000')
-    : '';
-
+const API_BASE = 'https://dailypaw-api.onrender.com';
 const DEV_MODE = false;
 
 // State Variables
