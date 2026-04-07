@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyPaw - Let's Start</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Supabase Client Setup -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script>
+        // Pre-render PLG routing check
+        const savedPet = localStorage.getItem('petProfile');
+        const isAddingNew = new URLSearchParams(window.location.search).get('new') === 'true';
+        if (savedPet && savedPet !== 'null' && !isAddingNew) {
+            sessionStorage.setItem('awaitingPremiumSync', 'true');
+            window.location.replace('dashboard.html');
+        }
+    </script>
+</head>
+
+<body class="app-body">
+    <div class="app-navbar onboarding-navbar">
+        <a href="index.html" class="brand">DailyPaw</a>
+    </div>
+
+    <main class="onboarding-main">
+        <div class="onboarding-card" style="animation: fadeInUp 0.6s ease forwards; opacity: 0;">
+            <h2>Let’s get to know your pet</h2>
+            <p class="subtitle">Set up your pet profile to unlock personalized care and smarter insights.</p>
+
+            <form id="onboarding-form" class="auth-form onboarding-form-premium">
+                <div class="avatar-upload-section">
+                    <div class="avatar-upload-circle" id="onboarding-avatar-circle">
+                        <input type="file" id="petPhotoInput" accept=".jpg,.jpeg,.png,.webp" required>
+                        <div class="avatar-empty-state" id="onboarding-avatar-empty">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            <span>Add Photo</span>
+                        </div>
+                        <div class="avatar-loading-spinner" id="onboarding-avatar-spinner" style="display: none;">
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <img id="petPhotoPreview" src="" alt="Pet Preview" style="display: none; object-fit: cover; width: 100%; height: 100%; border-radius: 50%; position: absolute; inset: 0; pointer-events: none;">
+                        <div class="avatar-edit-icon" id="onboarding-avatar-edit" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row split-2" style="grid-template-columns: 1fr;">
+                    <div class="form-group premium-input-group floating-group">
+                        <input type="text" id="pet-name" required>
+                        <label for="pet-name">Name</label>
+                    </div>
+                </div>
+
+                <div class="form-row species-selection-section">
+                    <label class="section-label">Species</label>
+                    <input type="hidden" id="pet-species" value="Dog" required>
+                    <div class="species-cards-grid">
+                        <div class="species-card selected cursor-pointer" data-value="Dog">
+                            <span class="card-emoji">🐶</span>
+                            <span class="card-label">Dog</span>
+                        </div>
+                        <div class="species-card cursor-pointer" data-value="Cat">
+                            <span class="card-emoji">🐱</span>
+                            <span class="card-label">Cat</span>
+                        </div>
+                        <div class="species-card cursor-pointer" data-value="Bird">
+                            <span class="card-emoji">🦜</span>
+                            <span class="card-label">Bird</span>
+                        </div>
+                        <div class="species-card cursor-pointer" data-value="Other">
+                            <span class="card-emoji">🐾</span>
+                            <span class="card-label">Other</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row split-2" style="margin-top: 24px;">
+                    <div class="form-group premium-input-group floating-group">
+                        <div class="breed-selector-wrapper">
+                            <input type="text" id="pet-breed" placeholder=" " autocomplete="off" required>
+                            <label for="pet-breed">Breed / Type</label>
+                            <div id="breed-dropdown" class="breed-dropdown-menu" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="form-group premium-input-group floating-group">
+                        <input type="number" id="pet-age" min="0" required>
+                        <label for="pet-age">Age (Years)</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group premium-input-group floating-group weight-input-wrapper">
+                        <input type="text" id="pet-weight" required>
+                        <label for="pet-weight">Weight</label>
+                        <span class="input-suffix">kg</span>
+                    </div>
+                </div>
+
+                <div class="form-row activity-cards-section">
+                    <label class="section-label">Activity Level</label>
+                    <input type="hidden" id="pet-activity" value="moderate" required>
+                    <div class="activity-cards-grid">
+                        <div class="activity-card" data-value="low">
+                            <div class="card-icon">🍃</div>
+                            <div class="card-content">
+                                <h4>Calm</h4>
+                                <p>Enjoys relaxing and light movement</p>
+                            </div>
+                            <div class="check-icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="activity-card selected" data-value="moderate">
+                            <div class="card-icon">🐾</div>
+                            <div class="card-content">
+                                <h4>Active</h4>
+                                <p>Daily exercise and regular play</p>
+                            </div>
+                            <div class="check-icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="activity-card" data-value="high">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-content">
+                                <h4>Energetic</h4>
+                                <p>Always running, playing, and exploring</p>
+                            </div>
+                            <div class="check-icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="onboarding-submit-btn" class="btn-primary w-100 onboarding-submit-btn" disabled>Finish setup</button>
+            </form>
+        </div>
+    </main>
+
+
+
+    <script src="app.js"></script>
+</body>
+
+</html>

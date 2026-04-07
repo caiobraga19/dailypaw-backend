@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyPaw - Simpler pet care.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Supabase Client Setup -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand">DailyPaw</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How it works</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <div class="nav-auth">
+                <a href="#" data-auth="login" class="btn-outline">Log in</a>
+                <a href="#" data-auth="signup" class="btn-primary">Start now</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" id="hero">
+            <div class="hero-bg"></div>
+            <div class="overlay-gradient"></div>
+
+            <div class="hero-content-wrapper">
+                <div class="hero-text">
+                    <h1 class="reveal"> <span class="text-gradient">Smart care</span>,<br>designed for them.</h1>
+                    <p class="subtitle reveal" style="transition-delay: 0.2s;">The seamlessly integrated tracker that
+                        understands your
+                        best friend.</p>
+                    <div class="hero-btns reveal" style="transition-delay: 0.4s;">
+                        <a href="#" data-auth="signup" class="btn-primary">Discover DailyPaw</a>
+                        <a href="#" data-auth="login" class="btn-outline" style="color: #FFFFFF; border-color: rgba(255,255,255,0.4);">Log in</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="section-header reveal">
+                <h2>Help your best friend live a longer<br>healthier life.</h2>
+                <p>Everything you need to keep your pet thriving, right in your pocket.</p>
+            </div>
+            <div class="features-grid reveal-stagger">
+                <div class="feature-card">
+                    <div class="feature-icon activity-icon"></div>
+                    <h3>Activity Tracking</h3>
+                    <p>Monitor daily steps, active minutes, and rest patterns with precision and care.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon diet-icon"></div>
+                    <h3>Dietary Logs</h3>
+                    <p>Track meals, treats, and weight changes to ensure optimal nutrition every day.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon vet-icon"></div>
+                    <h3>Vet Reminders</h3>
+                    <p>Never miss a vaccination, medication dose, or scheduled wellness checkup again.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works" id="how-it-works">
+            <div class="section-header reveal">
+                <h2>How it works</h2>
+                <p>Simple to use. Powerful in impact.</p>
+            </div>
+            <div class="steps-container reveal-stagger">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3>Track daily habits</h3>
+                    <p>Log your pet’s activity, meals, mood, and routines in seconds.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3>Build a health timeline</h3>
+                    <p>DailyPaw organizes everything into a clear, easy-to-follow history.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3>Get smart insights</h3>
+                    <p>Identify patterns, detect changes, and stay ahead of potential issues.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h3>Take better care</h3>
+                    <p>Use real data to make smarter decisions and improve your pet’s quality of life.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta reveal" id="cta">
+            <h2>Ready to join the pack?</h2>
+            <p>Start your pet's journey to better health today.</p>
+            <a href="#" data-auth="signup" class="btn-primary">Join DailyPaw</a>
+        </section>
+
+        <section class="pricing" id="pricing">
+            <div class="section-header reveal">
+                <h2>Simple pricing for smarter pet care</h2>
+                <p>Start free. Upgrade to unlock the full power of AI for your pet's longevity.</p>
+            </div>
+
+            <div class="pricing-grid reveal-stagger">
+                <!-- Free Plan -->
+                <div class="pricing-card">
+                    <div class="plan-header">
+                        <h3>Free</h3>
+                        <div class="price">$0</div>
+                        <p class="plan-desc">Essential tools for daily pet routine management.</p>
+                    </div>
+                    <ul class="feature-list">
+                        <li><span class="icon check"></span>Daily Tracking (once / day)</li>
+                        <li><span class="icon check"></span>Standard reminders (1 note)</li>
+                        <li><span class="icon check"></span>Real-time Health Status</li>
+                        <li><span class="icon check"></span>AI Chat (1 message / day)</li>
+                        <li><span class="icon check"></span>Basic Weekly Health Reports</li>
+                        <li><span class="icon check"></span>Register 1 pet</li>
+                        <li><span class="icon check"></span>Food scanner once a day</li>
+                    </ul>
+                    <a href="#" data-auth="signup" data-plan="free" class="btn-outline w-100">Start for free</a>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="pricing-card premium">
+                    <div class="popular-badge">Recommended</div>
+                    <div class="plan-header">
+                        <h3>DailyPaw AI+</h3>
+                        <div class="price-wrapper">
+                            <span class="old-price">$16.99</span>
+                            <div class="price">$12.99 <span class="period">/ month</span></div>
+                        </div>
+                        <p class="plan-desc">The ultimate AI-driven health intelligence for your best friend.</p>
+                    </div>
+                    <ul class="feature-list">
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
+                                AI Chat & Help</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
+                                AI Food Scans</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
+                                Daily Tracking</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Weekly
+                                Professional Reports</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Smart
+                                Clinical Guard (Alerts)</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>unlimited
+                                pet registration</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
+                                Task Reminders</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Advanced
+                                Medical Diagnostics</strong></li>
+                    </ul>
+                    <a href="#" data-auth="signup" data-plan="premium" class="btn-primary">Start AI+ Experience</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials" id="testimonials">
+            <div class="section-header reveal">
+                <h2>What pet parents are saying</h2>
+                <p>Real feedback from people using DailyPaw to care for their pets more intelligently.</p>
+            </div>
+            <div class="testimonials-grid reveal-stagger">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">“DailyPaw made it so much easier to track my pet’s routines and notice small
+                        changes before they became real problems.”</p>
+                    <div class="author-info">
+                        <span class="author-name">Amanda R.</span>
+                        <span class="author-role">Pet parent</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">“The interface is beautiful, simple, and actually useful. It helps me stay
+                        consistent with my pet’s health and habits.”</p>
+                    <div class="author-info">
+                        <span class="author-name">Lucas M.</span>
+                        <span class="author-role">Happy pet parent</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">“I love how easy it is to monitor mood, food, and activity in one place. It
+                        gives me peace of mind every day.”</p>
+                    <div class="author-info">
+                        <span class="author-name">Sarah T.</span>
+                        <span class="author-role">Busy pet parent</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">“As a new pet parent, DailyPaw helps me feel more confident. Everything feels
+                        organized, clear, and thoughtfully designed.”</p>
+                    <div class="author-info">
+                        <span class="author-name">Emily C.</span>
+                        <span class="author-role">New pet parent</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">“It feels like a premium product from the moment you open it. The reminders
+                        and health insights are incredibly helpful.”</p>
+                    <div class="author-info">
+                        <span class="author-name">Rafael P.</span>
+                        <span class="author-role">Pet care enthusiast</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 DailyPaw Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Auth Modal Overlay -->
+    <div class="auth-modal-overlay" id="auth-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container">
+            <button class="modal-close-btn" aria-label="Close modal">&times;</button>
+
+            <div class="auth-modal-content">
+                <!-- Sign Up Form -->
+                <div class="auth-form-container active" id="signup-form">
+                    <h2>Create your account</h2>
+                    <p class="subtitle">Start giving your pet the best care possible.</p>
+
+                    <button type="button" class="google-btn w-100">
+                        <svg width="18" height="18" viewBox="0 0 18 18">
+                            <path fill="#4285F4"
+                                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z">
+                            </path>
+                            <path fill="#34A853"
+                                d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z">
+                            </path>
+                            <path fill="#FBBC05"
+                                d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.177 0 7.551 0 9s.347 2.823.957 4.038l3.007-2.332z">
+                            </path>
+                            <path fill="#EA4335"
+                                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.49 0 2.443 2.017.957 4.962l3.007 2.332c.708-2.127 2.692-3.714 5.036-3.714z">
+                            </path>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <form class="auth-form" onsubmit="return handleAuthSubmit(event, 'signup')">
+                        <div class="form-group">
+                            <label for="signup-name">Full name</label>
+                            <input type="text" id="signup-name" required>
+                            <span class="error-msg">Please enter your full name.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                            <span class="error-msg">Please enter a valid email.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required minlength="8">
+                            <span class="error-msg">Password must be at least 8 characters.</span>
+                        </div>
+                        <button type="submit" id="btn-signup-submit" class="btn-primary w-100">Create account</button>
+                        <p class="auth-error-block" id="signup-error-block"
+                            style="display:none; color: #E63946; font-size: 0.9rem; text-align: center; margin-top: 12px; font-weight: 500;">
+                        </p>
+                    </form>
+
+                    <div class="auth-switch">
+                        Already have an account? <button type="button" class="btn-text"
+                            onclick="switchAuthMode('login')">Log in</button>
+                    </div>
+                </div>
+
+                <!-- Log In Form -->
+                <div class="auth-form-container" id="login-form">
+                    <h2>Welcome back</h2>
+                    <p class="subtitle">Log in to track your pet's daily routines.</p>
+
+                    <button type="button" class="google-btn w-100">
+                        <svg width="18" height="18" viewBox="0 0 18 18">
+                            <path fill="#4285F4"
+                                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z">
+                            </path>
+                            <path fill="#34A853"
+                                d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z">
+                            </path>
+                            <path fill="#FBBC05"
+                                d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.177 0 7.551 0 9s.347 2.823.957 4.038l3.007-2.332z">
+                            </path>
+                            <path fill="#EA4335"
+                                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.49 0 2.443 2.017.957 4.962l3.007 2.332c.708-2.127 2.692-3.714 5.036-3.714z">
+                            </path>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <form class="auth-form" onsubmit="return handleAuthSubmit(event, 'login')">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                            <span class="error-msg">Please enter a valid email.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                            <span class="error-msg">Please enter your password.</span>
+                        </div>
+                        <button type="submit" id="btn-login-submit" class="btn-primary w-100">Log in</button>
+                        <p class="auth-error-block" id="login-error-block"
+                            style="display:none; color: #E63946; font-size: 0.9rem; text-align: center; margin-top: 12px; font-weight: 500;">
+                        </p>
+                    </form>
+
+                    <div class="auth-switch">
+                        Don’t have an account? <button type="button" class="btn-text"
+                            onclick="switchAuthMode('signup')">Create account</button>
+                    </div>
+                </div>
+
+                <!-- Email Confirmation Pending -->
+                <div class="auth-form-container" id="email-pending-view">
+                    <div class="email-confirmation-view">
+                        <div class="email-pulse-icon">
+                            <span class="envelope-main">✉️</span>
+                            <span class="paw-badge">🐾</span>
+                        </div>
+                        <h2>Check your inbox</h2>
+                        <p class="subtitle">We've sent a verification link to <strong id="pending-email-display">your
+                                email</strong>. Please click it to activate your account.</p>
+
+                        <div class="confirmation-actions">
+                            <button type="button" class="btn-primary w-100" onclick="switchAuthMode('login')">Back to
+                                Login</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

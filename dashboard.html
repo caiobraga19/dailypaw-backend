@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyPaw - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Supabase Client Setup -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="supabase-client.js"></script>
+</head>
+
+<body class="app-body">
+    <div class="app-navbar dashboard-navbar">
+        <a href="index.html" class="brand">DailyPaw</a>
+        <div class="nav-actions">
+            <div class="custom-switcher" id="custom-pet-switcher">
+                <div class="switcher-trigger" id="switcher-trigger" tabindex="0">
+                    <div class="switcher-avatar-container" id="current-pet-avatar-container">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 5c.67 0 1.35.09 2 .26 1.78-2 2.67-2.74 4-3.26a1 1 0 0 1 1.28 1.5l-.81 3.22a6.5 6.5 0 1 1-12.94 0L4.72 3.5a1 1 0 0 1 1.28-1.5c1.33.52 2.22 1.26 4 3.26.65-.17 1.33-.26 2-.26Z" />
+                            <path d="M7 14h.01" />
+                            <path d="M12 14h.01" />
+                            <path d="M17 14h.01" />
+                            <path d="M7 18h.01" />
+                            <path d="M12 18h.01" />
+                            <path d="M17 18h.01" />
+                        </svg>
+                    </div>
+                    <span class="switcher-current-name" id="current-pet-name">Switch Pet</span>
+                    <svg class="switcher-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </div>
+                <div class="switcher-menu" id="switcher-menu">
+                    <div class="switcher-items" id="switcher-items">
+                        <!-- Dynamic pet items will be injected here -->
+                    </div>
+                    <div class="switcher-divider"></div>
+                    <div class="switcher-add-action" id="add-pet-action">
+                        <span class="add-icon">+</span>
+                        <span class="add-label">Add New Pet</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Professional Plan Manager -->
+            <div class="custom-switcher plan-manager" id="plan-pill-manager">
+                <div class="switcher-trigger" id="plan-pill-trigger" tabindex="0">
+                    <span class="plan-pill-label" id="current-plan-name">Free</span>
+                    <svg class="switcher-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </div>
+                <div class="switcher-menu plan-dropdown-menu" id="plan-dropdown-menu">
+                    <div id="plan-content-area" class="plan-dropdown-content">
+                        <!-- Dynamic content injected by app.js -->
+                    </div>
+                </div>
+            </div>
+            <button id="logout-btn" class="btn-outline btn-sm">Log out</button>
+        </div>
+    </div>
+
+
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            <!-- Welcome Header -->
+            <div class="dashboard-header">
+                <h1 id="welcome-text">Welcome back</h1>
+                <p class="subtitle">Here’s how <span id="welcome-pet-name">your pet</span> is doing today.</p>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions premium-actions-grid">
+                <button id="btn-health-insights" class="premium-action-btn">
+                    <span class="action-icon">📊</span>
+                    <span class="action-label">Health Insights</span>
+                </button>
+                <button id="btn-weekly-report" class="premium-action-btn">
+                    <span class="action-icon">🧠</span>
+                    <span class="action-label">Weekly AI Report</span>
+                </button>
+                <button id="btn-add-reminder" class="premium-action-btn" onclick="openAppModal('add-reminder-modal')">
+                    <span class="action-icon">⏰</span>
+                    <span class="action-label">Add Reminder</span>
+                </button>
+                <button id="btn-scan-food" class="premium-action-btn" onclick="openAppModal('food-scanner-modal')">
+                    <span class="action-icon">📷</span>
+                    <span class="action-label">Scan Food</span>
+                </button>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+
+                <!-- Daily Tracking Widget -->
+                <div class="dashboard-card stat-card" id="daily-tracking-card">
+                    <div class="card-header">
+                        <h3>Daily Tracking</h3>
+                        <span id="daily-status-feedback" class="feedback-text subtle"></span>
+                    </div>
+                    <form id="daily-log-form">
+                        <div class="pill-form-layout">
+
+                            <div class="pill-group">
+                                <span class="pill-label">Energy</span>
+                                <div class="pill-options">
+                                    <button type="button" class="pill-btn tracking-option" data-category="energy"
+                                        data-value="Low">Low</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="energy"
+                                        data-value="Normal">Normal</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="energy"
+                                        data-value="High">High</button>
+                                </div>
+                            </div>
+
+                            <div class="pill-group">
+                                <span class="pill-label">Appetite</span>
+                                <div class="pill-options">
+                                    <button type="button" class="pill-btn tracking-option" data-category="appetite"
+                                        data-value="Low">Low</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="appetite"
+                                        data-value="Normal">Normal</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="appetite"
+                                        data-value="High">High</button>
+                                </div>
+                            </div>
+
+                            <div class="pill-group">
+                                <span class="pill-label">Mood</span>
+                                <div class="pill-options">
+                                    <button type="button" class="pill-btn tracking-option" data-category="mood"
+                                        data-value="Calm">Calm</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="mood"
+                                        data-value="Playful">Playful</button>
+                                    <button type="button" class="pill-btn tracking-option" data-category="mood"
+                                        data-value="Sad">Sad</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-action" style="margin-top: 32px;">
+                            <button type="submit" id="save-tracking-btn" class="dash-btn w-100">Save today's
+                                status</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Pet Profile Highlight -->
+                <div class="dashboard-card profile-card">
+                    <div class="card-header">
+                        <h3>Pet Profile</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-text btn-sm" onclick="location.href='onboarding.html?new=true'">+ New</button>
+                            <button class="btn-text btn-sm" onclick="openAppModal('update-profile-modal')">Edit</button>
+                        </div>
+                    </div>
+
+                    <div class="pet-avatar-wrapper">
+                        <input type="file" id="pet-avatar-upload" accept="image/jpeg, image/png, image/webp" hidden>
+                        <div class="pet-avatar-container"
+                            onclick="document.getElementById('pet-avatar-upload').click()">
+                            <img id="pet-avatar-preview" src="" alt="Pet Avatar">
+                            <div id="pet-avatar-placeholder" class="avatar-placeholder">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 5c.67 0 1.35.09 2 .26 1.78-2 2.67-2.74 4-3.26a1 1 0 0 1 1.28 1.5l-.81 3.22a6.5 6.5 0 1 1-12.94 0L4.72 3.5a1 1 0 0 1 1.28-1.5c1.33.52 2.22 1.26 4 3.26.65-.17 1.33-.26 2-.26Z" />
+                                    <path d="M7 14h.01" />
+                                    <path d="M12 14h.01" />
+                                    <path d="M17 14h.01" />
+                                    <path d="M7 18h.01" />
+                                    <path d="M12 18h.01" />
+                                    <path d="M17 18h.01" />
+                                </svg>
+                            </div>
+                            <div class="avatar-overlay">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                    </path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Name</span>
+                            <span class="detail-value" id="dash-name" style="font-weight: 700;">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Breed</span>
+                            <span class="detail-value" id="dash-breed">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Age</span>
+                            <span class="detail-value" id="dash-age">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Weight</span>
+                            <span class="detail-value" id="dash-weight">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly AI Health Summary -->
+                <div class="dashboard-card brain-card" id="weekly-report-card">
+                    <div class="card-header card-premium-header">
+                        <div class="premium-icon-box glow-brain">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 5.586 3.5 3.5 0 0 0 6.824 1.123 2 2 0 0 0 2.36 0 3.5 3.5 0 0 0 6.824-1.123 4 4 0 0 0 .52-5.586 4 4 0 0 0-2.526-5.77A3 3 0 1 0 12 5" />
+                                <path d="M12 5V21" />
+                                <path d="M12 13H5" />
+                                <path d="M12 13h7" />
+                            </svg>
+                        </div>
+                        <h3>Weekly AI Report</h3>
+                    </div>
+
+                    <div id="weekly-report-content" class="report-box"
+                        style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                        <div class="report-placeholder" id="ai-text-container">
+                            <p id="ai-report-text">Analyzing recent logs to build your weekly insight...</p>
+                            <button id="generate-report-btn" class="btn-text" style="margin-top:10px;">Generate
+                                Now</button>
+                        </div>
+
+                        <div class="premium-upsell-banner"
+                            style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                            <p style="color: #1E40AF; font-weight: 500; margin-bottom: 1rem; font-size: 0.95rem;">
+                                Atualize para o AI+ para obter uma análise clínica profissional.
+                            </p>
+                            <button onclick="handleUpgrade()" class="btn-primary"
+                                style="background-color: #2563EB; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: background-color 0.2s;">
+                                Upgrade to AI+
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Health Insights -->
+                <div class="dashboard-card alert-card">
+                    <div class="card-header card-premium-header">
+                        <div class="premium-icon-box status-amber">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                        </div>
+                        <h3 style="display: flex; align-items: center; gap: 8px;">Health Insights <span style="background: linear-gradient(135deg, #2563EB, #4F46E5); color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);">AI+ PRO</span></h3>
+                        <span id="insight-badge" class="status-pill success" style="margin-left: auto;">TELEMETRY
+                            STABLE</span>
+                    </div>
+                    <div class="insight-box" id="insight-container">
+                        <p><strong>Everything looks great!</strong> Keep tracking your pet's vital stats to receive
+                            personalized AI health insights.</p>
+                    </div>
+                </div>
+
+                <!-- Vet Reminders -->
+                <div class="dashboard-card list-card">
+                    <div class="card-header">
+                        <h3>Upcoming Reminders</h3>
+                        <button class="btn-text btn-sm" onclick="openAppModal('add-reminder-modal')">+ Add</button>
+                    </div>
+                    <ul class="reminder-list" id="reminders-container">
+                        <li class="empty-state">No upcoming reminders securely logged yet.</li>
+                    </ul>
+                </div>
+
+                <!-- Food Scan History MVP -->
+                <div class="dashboard-card list-card">
+                    <div class="card-header">
+                        <h3>Recent Food Analysis</h3>
+                        <button class="btn-text btn-sm" onclick="openAppModal('food-scanner-modal')">+ Scan</button>
+                    </div>
+                    <ul class="reminder-list" id="food-scan-history">
+                        <li class="empty-state">No food analysis yet.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Update Profile Modal -->
+    <div class="auth-modal-overlay" id="update-profile-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container">
+            <button class="modal-close-btn" aria-label="Close modal"
+                onclick="closeAppModal('update-profile-modal')">&times;</button>
+            <div class="auth-modal-content">
+                <div class="auth-form-container active">
+                    <h2>Update Profile</h2>
+
+                    <div class="pet-avatar-wrapper modal-avatar">
+                        <input type="file" id="modal-avatar-upload" accept="image/jpeg, image/png, image/webp" hidden>
+                        <div class="pet-avatar-container"
+                            onclick="document.getElementById('modal-avatar-upload').click()">
+                            <img id="modal-avatar-preview" src="" alt="Pet Avatar">
+                            <div id="modal-avatar-placeholder" class="avatar-placeholder">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 5c.67 0 1.35.09 2 .26 1.78-2 2.67-2.74 4-3.26a1 1 0 0 1 1.28 1.5l-.81 3.22a6.5 6.5 0 1 1-12.94 0L4.72 3.5a1 1 0 0 1 1.28-1.5c1.33.52 2.22 1.26 4 3.26.65-.17 1.33-.26 2-.26Z" />
+                                    <path d="M7 14h.01" />
+                                    <path d="M12 14h.01" />
+                                    <path d="M17 14h.01" />
+                                    <path d="M7 18h.01" />
+                                    <path d="M12 18h.01" />
+                                    <path d="M17 18h.01" />
+                                </svg>
+                            </div>
+                            <div class="avatar-overlay">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                    </path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="update-profile-form" class="auth-form mt-4">
+                        <div class="profile-form-grid">
+                            <div class="form-group floating-group field-locked">
+                                <input type="text" id="edit-pet-name" placeholder=" " required readonly>
+                                <label for="edit-pet-name">Name</label>
+                            </div>
+                            <div class="form-group select-wrapper field-locked">
+                                <select id="edit-pet-species" class="form-select" required disabled>
+                                    <option value="" disabled selected hidden></option>
+                                    <!-- Placeholder hack for select -->
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <label for="edit-pet-species">Species</label>
+                            </div>
+                            <div class="form-group floating-group field-locked">
+                                <input type="text" id="edit-pet-breed" placeholder=" " required readonly>
+                                <label for="edit-pet-breed">Breed</label>
+                            </div>
+                            <div class="form-group floating-group">
+                                <input type="number" id="edit-pet-age" placeholder=" " required>
+                                <label for="edit-pet-age">Age</label>
+                            </div>
+                            <div class="form-group floating-group full-width-row weight-input-wrapper">
+                                <input type="text" id="edit-pet-weight" placeholder=" " required>
+                                <label for="edit-pet-weight">Weight</label>
+                                <span class="input-suffix">kg</span>
+                            </div>
+                            <div class="form-group full-width-row activity-selection-section" style="margin-top: 16px;">
+                                <label class="section-label"
+                                    style="display: block; font-size: 0.95rem; font-weight: 600; color: var(--text-color); margin-bottom: 12px;">Activity
+                                    Level</label>
+                                <div class="activity-cards-grid" id="edit-activity-cards">
+                                    <div class="activity-card" data-value="low">
+                                        <span class="card-icon">😴</span>
+                                        <div class="card-content">
+                                            <h4>Low</h4>
+                                            <p>Sedentary</p>
+                                        </div>
+                                    </div>
+                                    <div class="activity-card" data-value="moderate">
+                                        <span class="card-icon">🚶‍♂️</span>
+                                        <div class="card-content">
+                                            <h4>Moderate</h4>
+                                            <p>Short Walks</p>
+                                        </div>
+                                    </div>
+                                    <div class="activity-card" data-value="high">
+                                        <span class="card-icon">🐕</span>
+                                        <div class="card-content">
+                                            <h4>Active</h4>
+                                            <p>Daily Exercise</p>
+                                        </div>
+                                    </div>
+                                    <div class="activity-card" data-value="very_high">
+                                        <span class="card-icon">⚡</span>
+                                        <div class="card-content">
+                                            <h4>Very Active</h4>
+                                            <p>Athlete/High Energy</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.85rem; color: #8C9993; margin-top: 12px; font-style: italic;">
+                                    This helps the AI adjust calorie recommendations.
+                                </p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary w-100 onboarding-submit-btn"
+                            style="margin-top: 24px;">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Reminder Modal -->
+    <div class="auth-modal-overlay" id="add-reminder-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container reminder-modal-premium">
+            <button class="modal-close-btn" aria-label="Close modal"
+                onclick="closeAppModal('add-reminder-modal')">&times;</button>
+            <div class="auth-modal-content">
+                <div class="auth-form-container active">
+                    <h2 style="font-size:1.6rem; margin-bottom:4px;">New Reminder</h2>
+                    <p class="subtitle" style="font-size:0.9rem; margin-bottom:28px; color:var(--text-muted);">Keep your
+                        pet's health on track 🐾</p>
+
+                    <form id="add-reminder-form" class="auth-form">
+                        <!-- Visual Type Selector Grid -->
+                        <label class="rem-section-label">Type</label>
+                        <input type="hidden" id="rem-type" value="vaccine">
+                        <div class="reminder-type-grid" id="reminder-type-grid">
+                            <div class="rem-type-card selected" data-value="vaccine">
+                                <span class="rem-type-icon">💉</span>
+                                <span class="rem-type-label">Vaccine</span>
+                            </div>
+                            <div class="rem-type-card" data-value="medicine">
+                                <span class="rem-type-icon">💊</span>
+                                <span class="rem-type-label">Medication</span>
+                            </div>
+                            <div class="rem-type-card" data-value="bath">
+                                <span class="rem-type-icon">🧼</span>
+                                <span class="rem-type-label">Hygiene</span>
+                            </div>
+                            <div class="rem-type-card" data-value="other">
+                                <span class="rem-type-icon">🗓️</span>
+                                <span class="rem-type-label">Other</span>
+                            </div>
+                        </div>
+
+                        <!-- Borderless Title Input -->
+                        <div class="rem-input-group">
+                            <label for="rem-title" class="rem-section-label">Title</label>
+                            <input type="text" id="rem-title" class="rem-borderless-input"
+                                placeholder="e.g.: V10 Vaccine, Monthly Bath..." required>
+                        </div>
+
+                        <!-- Premium Date Selection -->
+                        <div class="rem-input-group">
+                            <label for="rem-date" class="rem-section-label">Date</label>
+                            <div class="date-input-wrapper">
+                                <span class="date-icon">📅</span>
+                                <input type="date" id="rem-date" class="rem-date-pill" required>
+                                <span class="date-arrow">↓</span>
+                            </div>
+                        </div>
+                        <!-- Premium Save Button -->
+                        <button type="submit" id="save-reminder-btn" class="rem-save-btn">Save Reminder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Insights Modal -->
+    <div class="auth-modal-overlay" id="health-insights-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container">
+            <button class="modal-close-btn" aria-label="Close modal"
+                onclick="closeAppModal('health-insights-modal')">&times;</button>
+            <div class="auth-modal-content text-center">
+                <h2>Health Insights 📊</h2>
+                <div id="health-insights-content" class="insight-box mt-4" style="text-align: left;">
+                    <p class="text-muted">Analyzing your pet's recent daily logs...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Scanner Modal -->
+    <div class="auth-modal-overlay" id="food-scanner-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container">
+            <button class="modal-close-btn" aria-label="Close modal"
+                onclick="closeAppModal('food-scanner-modal')">&times;</button>
+            <div class="auth-modal-content">
+                <div class="auth-form-container active">
+                    <h2>Food Scanner 📷</h2>
+                    <p class="subtitle mt-2">Scan your pet's meal for instant veterinary nutritional analysis.</p>
+
+                    <div class="scanner-action-container mt-4 text-center">
+                        <!-- Hidden File Input targeting Camera -->
+                        <input type="file" id="camera-input" accept="image/*" capture="environment"
+                            style="display: none;">
+
+                        <!-- Single Action Button -->
+                        <button type="button" id="scan-food-btn" class="btn-primary w-100 onboarding-submit-btn"
+                            style="height: 60px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>📸</span> Scan Food
+                        </button>
+                    </div>
+
+                    <div id="food-scanner-context-container" class="mt-4" style="display: none;">
+                        <label for="food-context-input"
+                            style="display: block; font-size: 0.85rem; color: #8C9993; margin-bottom: 8px;">Write about
+                            the food to get a better response (What it is, weight, brand, etc.)</label>
+                        <textarea id="food-context-input"
+                            style="width: 100%; height: 80px; padding: 12px; border-radius: 12px; border: 1px solid #e0e6ed; font-family: inherit; font-size: 0.9rem; resize: none;"></textarea>
+
+                        <button type="button" id="analyze-food-final-btn" class="btn-primary w-100 mt-3"
+                            style="height: 50px; font-weight: 600;">
+                            ✨ Analyze Now
+                        </button>
+                    </div>
+
+                    <div id="scanner-preview-container" class="mt-4"
+                        style="display: none; border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 16/9; background: #f0f0f5;">
+                        <img id="scanner-preview-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                        <button id="retake-btn"
+                            style="position: absolute; bottom: 10px; right: 10px; padding: 8px 16px; border-radius: 20px; border: none; background: rgba(0,0,0,0.6); color: white; cursor: pointer;">Change
+                            Photo</button>
+                    </div>
+
+                    <div id="food-scan-result-container" class="mt-4" style="display: none;">
+                        <!-- Results Card injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- AI Chat Floating Widget -->
+    <div id="ai-chat-fab" class="chat-fab" onclick="toggleAIChat()">
+        <span class="chat-fab-icon">🐾</span>
+        <span class="chat-fab-badge" id="chat-fab-badge" style="display:none;"></span>
+    </div>
+
+    <div id="ai-chat-window" class="chat-window" style="display:none;">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <span class="chat-header-avatar">🧠</span>
+                <div>
+                    <strong>DailyPaw AI</strong>
+                    <span class="chat-header-status" id="chat-status">Online</span>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="chat-clear-btn" onclick="clearAIChat()" title="Clear conversation">🗑️</button>
+                <button class="chat-close-btn" onclick="toggleAIChat()">&times;</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-bubble ai">
+                <p>Hi there! 🐾 I'm your DailyPaw Veterinary Assistant. How can I help your pet today?</p>
+                <span class="chat-time">Now</span>
+            </div>
+        </div>
+        <div class="chat-input-bar">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Ask about your pet..."
+                autocomplete="off">
+            <button id="chat-send-btn" class="chat-send-btn" onclick="sendAIChatMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Post-Onboarding Magic Tour Modal -->
+    <div class="auth-modal-overlay tour-modal-overlay" id="magic-tour-modal" aria-hidden="true" role="dialog">
+        <div class="tour-modal-container">
+            <div class="tour-slides-wrapper" id="tour-slides">
+                <!-- Step 1 -->
+                <div class="tour-slide active" data-step="1">
+                    <div class="tour-icon-box welcome-icon">✨</div>
+                    <h2>Welcome to the Family.</h2>
+                    <p>DailyPaw is more than a tracker; it's a dedicated health assistant for your pet.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="tour-slide" data-step="2">
+                    <div class="tour-icon-box brain-icon">🧠</div>
+                    <h2>Everything is Connected.</h2>
+                    <p>Every food scan, mood log, and chat session builds a unique health profile. Our AI connects the
+                        dots to find patterns you might miss.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="tour-slide" data-step="3">
+                    <div class="tour-icon-box safety-icon">💎</div>
+                    <h2>Peace of Mind.</h2>
+                    <p>Reliable insights and weekly reports generated from real data. We help you make the best
+                        decisions for your friend's long-term health.</p>
+                </div>
+            </div>
+
+            <div class="tour-footer">
+                <button class="btn-text" id="btn-tour-skip">Skip</button>
+                <div class="tour-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <button class="btn-primary" id="btn-tour-next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Limit Modal -->
+    <div class="auth-modal-overlay" id="premium-limit-modal" aria-hidden="true" role="dialog">
+        <div class="auth-modal-container premium-upgrade-modal">
+            <button class="modal-close-btn" aria-label="Close modal"
+                onclick="closeAppModal('premium-limit-modal')">&times;</button>
+            <div class="auth-modal-content text-center">
+                <div class="premium-badge-icon">💎</div>
+                <h2 id="limit-modal-title">Limit Reached</h2>
+                <p id="limit-modal-message" class="subtitle mt-3">You've reached your Free tier limit for today. Upgrade
+                    to AI+ for unlimited access to scans, chat, and more.</p>
+
+                <div class="limit-perks-list">
+                    <div class="perk-item"><span>🚀</span> Unlimited AI Food Scans</div>
+                    <div class="perk-item"><span>🧠</span> Unlimited Veterinary AI Chat</div>
+                    <div class="perk-item"><span>📊</span> Professional Weekly Reports</div>
+                    <div class="perk-item"><span>🛡️</span> Smart Clinical Health Guard</div>
+                </div>
+
+                <button class="btn-primary w-100 mt-4" style="height: 56px; font-size: 1.1rem;"
+                    onclick="handleUpgrade()">Upgrade to AI+ Now</button>
+                <button class="btn-text mt-3" onclick="closeAppModal('premium-limit-modal')">Maybe later</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
