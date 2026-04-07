@@ -100,6 +100,32 @@ app.post("/api/webhook", express.raw({ type: 'application/json' }), async (req, 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
+// --- ROTA PARA CRIAR O PAGAMENTO (CHECKOUT) ---
+app.post("/api/create-checkout-session", async (req, res) => {
+    const { userId } = req.body;
+
+    // Pega a URL do seu site na Vercel (que configuramos no Render) ou usa localhost como reserva
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            client_reference_id: userId, // CRUCIAL para o Webhook saber quem pagou
+            line_items: [{
+                price: 'ID_DO_SEU_PRECO_AQUI', // Substitua pelo ID do preço no Stripe
+                quantity: 1,
+            }],
+            mode: 'subscription',
+            success_url: `${FRONTEND_URL}/dashboard.html?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${FRONTEND_URL}/dashboard.html`,
+        });
+
+        res.json({ id: session.id });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Ensure /signup route serves index.html for the auth flow
 app.get("/signup", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
