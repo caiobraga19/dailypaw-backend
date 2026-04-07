@@ -278,7 +278,6 @@ STRICT REQUIREMENTS FOR AI:
 4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
 5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
         }
-
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),
             new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
