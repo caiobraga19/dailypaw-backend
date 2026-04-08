@@ -67,6 +67,12 @@ function resetScannerModal() {
     }
     window.currentCapturedFile = null;
 }
+// Remove o '#' residual deixado pelo sistema de autenticação do Supabase
+window.addEventListener('load', () => {
+    if (window.location.hash === '#' || window.location.href.endsWith('#')) {
+        window.history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
 
