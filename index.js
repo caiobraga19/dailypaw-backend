@@ -251,11 +251,13 @@ Instructions:
 
 app.post("/api/generate-weekly-report", async (req, res) => {
     try {
+        // Pega exatamente o que o frontend enviou, sem consultar o banco
         const { userId, isPremium, petContext, logs, scans, chatHistory } = req.body;
 
-        // 2. Build Tiered Prompt
         let prompt = "";
-        if (isPremium) {
+
+        // TRAVA DE SEGURANÇA MÁXIMA: Só gera o texto longo se for estritamente PRO
+        if (isPremium === true) {
             prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
 Pet Profile: ${JSON.stringify(petContext)}
 Daily Logs (7 days): ${JSON.stringify(logs)}
@@ -263,14 +265,16 @@ Food Scanner Data: ${JSON.stringify(scans)}
 Recent Chat Context: ${JSON.stringify(chatHistory)}
 
 STRICT REQUIREMENTS FOR AI:
-1. FORMAT: Write EXACTLY 3 distinct paragraphs. You MUST use "\n\n" between paragraphs to ensure proper formatting on the frontend. Do NOT output a single block of text. Minimum 150 words total.
+1. FORMAT: Write EXACTLY 3 distinct paragraphs. You MUST use "\\n\\n" between paragraphs to ensure proper formatting on the frontend. Do NOT output a single block of text. Minimum 150 words total.
 2. PARAGRAPH 1 (Vitals): Analyze energy, appetite, and mood trends. Use strict clinical terminology (e.g., lethargy, anorexia, behavioral baseline, vital stability). Do not use emojis.
 3. PARAGRAPH 2 (Nutrition): Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg).
 4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
 5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
         } else {
-            prompt = `You are a casual, friendly pet assistant. Write a VERY SHORT, simple summary (MAXIMUM 2 sentences) for ${petContext.name} based on these logs: ${JSON.stringify(logs)}. CRITICAL RULES: 1. Keep it extremely brief and informal. 2. DO NOT use clinical, medical, or complex terminology (absolutely no words like 'macronutrient', 'lethargy', 'systemic'). 3. STRICT LIMIT: Exactly 1 or 2 short sentences. No paragraphs. 4. Reply in the user's language.`;
+            // MODO FREE BLINDADO
+            prompt = `You are a casual, friendly pet assistant. Write a VERY SHORT, simple summary (MAXIMUM 2 sentences) for ${petContext.name} based on these logs: ${JSON.stringify(logs)}. CRITICAL RULES: 1. Keep it extremely brief and informal. 2. DO NOT use clinical, medical, or complex terminology. 3. STRICT LIMIT: Exactly 1 or 2 short sentences. No paragraphs. 4. Reply in the user's language.`;
         }
+
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),
             new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
@@ -278,7 +282,7 @@ STRICT REQUIREMENTS FOR AI:
 
         res.json({
             summary: result.insight || result.text || "Status: Logged. System sync in progress.",
-            isPremiumTier: isPremium
+            isPremiumTier: isPremium === true
         });
     } catch (e) {
         console.error("Weekly Report Error:", e);
