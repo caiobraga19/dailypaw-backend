@@ -248,11 +248,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (error) throw error;
 
-                console.log("[AUTH] Conta Criada! Redirecionando...");
-                btn.style.backgroundColor = "#10B981"; // Pinta de Verde
+                console.log("[AUTH] Cadastro iniciado com sucesso! Aguardando confirmação...");
+                
+                // Exibe o estado de "Awaiting Verification"
+                const pendingEmailEl = document.getElementById('pending-email-display');
+                if (pendingEmailEl) pendingEmailEl.textContent = email;
+                
+                switchAuthMode('email-pending');
+                
+                // O botão de sucesso é apenas um feedback rápido antes de trocar a view
+                btn.style.backgroundColor = "#10B981";
                 btn.style.color = "#ffffff";
                 btn.textContent = 'Success!';
-                setTimeout(() => window.location.href = 'onboarding.html', 500);
+
             }
 
         } catch (error) {
@@ -289,27 +297,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- Monitor Exclusivo para Retorno do Google OAuth ---
+// --- Global Auth Listener (Cross-Tab Sync & OAuth) ---
 window.supabaseClient.auth.onAuthStateChange((event, session) => {
-    // Determine if we are on a "guest" page (landing or signup)
-    const isGuestPage = window.location.pathname.endsWith('index.html') || 
-                       window.location.pathname === '/' || 
-                       window.location.pathname.includes('/signup');
+    console.log(`[AUTH] Evento detectado: ${event}`);
 
-    if (session && isGuestPage) {
-        // Handle both the SIGNED_IN event (triggered by OAuth) and active sessions with hash tokens
-        if (event === 'SIGNED_IN' || window.location.hash.includes('access_token')) {
-            console.log("[AUTH] Google Login or Active Session detected. Navigating to Dashboard...");
+    // If a session is detected (especially via cross-tab sync or email confirmation)
+    if (session) {
+        // Narrow the scope to guest pages (landing/signup) to prevent unnecessary redirects on dashboard/onboarding
+        const isGuestPage = window.location.pathname.endsWith('index.html') || 
+                           window.location.pathname === '/' || 
+                           window.location.pathname.includes('/signup');
 
-            // Professional cleanup: Remove OAuth tokens from the URL bar
-            if (window.location.hash.includes('access_token')) {
-                window.history.replaceState(null, null, ' ');
+        if (isGuestPage) {
+            // SIGNED_IN is the primary event for cross-tab sync after email verification
+            if (event === 'SIGNED_IN') {
+                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login). Redirecionando para Onboarding...");
+                
+                // Handle OAuth token cleanup if present
+                if (window.location.hash.includes('access_token')) {
+                    window.history.replaceState(null, null, ' ');
+                }
+
+                // Immediately redirect to onboarding as per requirements
+                window.location.href = '/onboarding';
             }
-
-            // Smooth transition to the application core
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 500);
         }
     }
 });

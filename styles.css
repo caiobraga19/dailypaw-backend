@@ -4846,16 +4846,37 @@ footer p {
     border-left: 4px solid #10B981;
 }
 
-
-/* --- Premium Weekly Report Styling --- */
-.weekly-report-paragraph {
-    font-size: 1.10rem;
-    line-height: 1.8;
-    color: #2D3632;
-    text-align: left;
-    white-space: pre-line;
-    background: #F8FAFC;
+/* --- Awaiting Verification UI Styles --- */
+.verification-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
-    border-radius: 12px;
-    border-left: 4px solid #10B981;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
 }
+
+.verification-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(16, 185, 129, 0.1);
+    border-left-color: #10B981;
+    border-radius: 50%;
+    margin-bottom: 24px;
+    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.verification-message {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.verification-subtext {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}

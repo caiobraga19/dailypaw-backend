@@ -340,21 +340,21 @@
 
                 <!-- Email Confirmation Pending -->
                 <div class="auth-form-container" id="email-pending-view">
-                    <div class="email-confirmation-view">
+                    <div class="verification-loading-container">
+                        <div class="verification-spinner"></div>
                         <div class="email-pulse-icon">
-                            <span class="envelope-main">✉️</span>
+                            <span class="envelope-main">📧</span>
                             <span class="paw-badge">🐾</span>
                         </div>
-                        <h2>Check your inbox</h2>
-                        <p class="subtitle">We've sent a verification link to <strong id="pending-email-display">your
-                                email</strong>. Please click it to activate your account.</p>
+                        <h2 class="verification-message">Check your inbox!</h2>
+                        <p class="verification-subtext">We've sent a verification link to <strong id="pending-email-display">your email</strong>. Waiting for confirmation...</p>
 
-                        <div class="confirmation-actions">
-                            <button type="button" class="btn-primary w-100" onclick="switchAuthMode('login')">Back to
-                                Login</button>
+                        <div class="confirmation-actions" style="margin-top: 32px;">
+                            <button type="button" class="btn-text" onclick="switchAuthMode('login')">Back to Login</button>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
