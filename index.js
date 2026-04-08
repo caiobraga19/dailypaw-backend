@@ -251,16 +251,7 @@ Instructions:
 
 app.post("/api/generate-weekly-report", async (req, res) => {
     try {
-        const { userId, petContext, logs, scans, chatHistory } = req.body;
-
-        // 1. Identify User Tier
-        const { data: profile } = await supabaseAdmin
-            .from('profiles')
-            .select('is_premium')
-            .eq('id', userId)
-            .single();
-
-        const isPremium = profile?.is_premium || false;
+        const { userId, isPremium, petContext, logs, scans, chatHistory } = req.body;
 
         // 2. Build Tiered Prompt
         let prompt = "";

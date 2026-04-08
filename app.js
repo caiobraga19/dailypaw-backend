@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const logs = await window.supabaseClient.from('daily_logs').select('*').eq('pet_id', activePetId).limit(7);
                     const response = await fetch(`${API_BASE}/api/generate-weekly-report`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userId: user.id, petContext: petProfile, logs: logs.data || [], chatHistory: getChatHistory() })
+                        body: JSON.stringify({ userId: user.id, isPremium: userProfile?.is_premium || false, petContext: petProfile, logs: logs.data || [], chatHistory: getChatHistory() })
                     });
                     if (response.ok) {
                         const data = await response.json();
