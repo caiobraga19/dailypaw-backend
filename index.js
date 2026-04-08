@@ -68,7 +68,6 @@ app.post("/api/webhook", express.raw({ type: 'application/json' }), async (req, 
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // 🛡️ STRIPE WEBHOOK: Clinical Grade Event Handling
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const userId = session.client_reference_id;
@@ -103,21 +102,19 @@ app.use(express.static(__dirname));
 // --- ROTA PARA CRIAR O PAGAMENTO (CHECKOUT) ---
 app.post("/api/create-checkout-session", async (req, res) => {
     const { userId } = req.body;
-
-    // Pega a URL do seu site na Vercel (que configuramos no Render) ou usa localhost como reserva
     const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            client_reference_id: userId, // CRUCIAL para o Webhook saber quem pagou
+            client_reference_id: userId,
             line_items: [{
-                price: 'ID_DO_SEU_PRECO_AQUI', // Substitua pelo ID do preço no Stripe
+                price: 'ID_DO_SEU_PRECO_AQUI',
                 quantity: 1,
             }],
             mode: 'subscription',
-            success_url: `${FRONTEND_URL}/dashboard.html?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${FRONTEND_URL}/dashboard.html`,
+            success_url: `${FRONTEND_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${FRONTEND_URL}/dashboard`,
         });
 
         res.json({ id: session.id });
@@ -126,17 +123,14 @@ app.post("/api/create-checkout-session", async (req, res) => {
     }
 });
 
-// Ensure /signup route serves index.html for the auth flow
 app.get("/signup", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
-
 
 // --- BACKEND GATING UTILITY ---
 async function checkBackendLimit(userId, feature) {
     if (!userId) return { allowed: false, error: "Identification failed" };
 
-    // 1. Get Profile
     const { data: profile } = await supabaseAdmin
         .from('profiles')
         .select('is_premium')
@@ -145,7 +139,6 @@ async function checkBackendLimit(userId, feature) {
 
     if (profile?.is_premium) return { allowed: true };
 
-    // 2. Check Daily Limit (1/day for Free)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -169,9 +162,6 @@ async function checkBackendLimit(userId, feature) {
 
     const { count } = await query;
 
-    // 🛡️ CORREÇÃO CIRÚRGICA:
-    // Como o frontend salva a 1ª mensagem ANTES de chamar a API, o count já será 1.
-    // Então, para o CHAT, o limite real é bloquear apenas se for MAIOR que 1.
     if (feature === 'CHAT' && count > 1) {
         return { allowed: false, error: "Daily limit reached for Free Tier. Upgrade to AI+ for unlimited access." };
     } else if (feature === 'SCAN' && count >= 1) {
@@ -180,8 +170,6 @@ async function checkBackendLimit(userId, feature) {
 
     return { allowed: true };
 }
-
-
 
 let transport;
 app.get("/sse", async (req, res) => {
@@ -226,7 +214,6 @@ app.post("/api/chat", async (req, res) => {
     isBusy = true;
     try {
         console.log(`DEBUG: Chat message received: "${message}"`);
-        // Enhanced prompt for Gemini 2.5 Intelligence
         const prompt = `You are the DailyPaw Veterinary AI Assistant, a Clinical Expert.
 Context: ${context || "DailyPaw Assistant"}.
 User message: ${message}
@@ -251,13 +238,20 @@ Instructions:
 
 app.post("/api/generate-weekly-report", async (req, res) => {
     try {
-        // Pega exatamente o que o frontend enviou, sem consultar o banco
         const { userId, isPremium, petContext, logs, scans, chatHistory } = req.body;
+
+        // TRAVA 100% BLINDADA: Validando o status diretamente pelo banco de dados também
+        const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('is_premium')
+            .eq('id', userId)
+            .single();
+
+        const isUserPro = profile?.is_premium === true;
 
         let prompt = "";
 
-        // TRAVA DE SEGURANÇA MÁXIMA: Só gera o texto longo se for estritamente PRO
-        if (isPremium === true) {
+        if (isUserPro) {
             prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
 Pet Profile: ${JSON.stringify(petContext)}
 Daily Logs (7 days): ${JSON.stringify(logs)}
@@ -271,8 +265,7 @@ STRICT REQUIREMENTS FOR AI:
 4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
 5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
         } else {
-            // MODO FREE BLINDADO
-            prompt = `You are a casual, friendly pet assistant. Write a VERY SHORT, simple summary (MAXIMUM 2 sentences) for ${petContext.name} based on these logs: ${JSON.stringify(logs)}. CRITICAL RULES: 1. Keep it extremely brief and informal. 2. DO NOT use clinical, medical, or complex terminology. 3. STRICT LIMIT: Exactly 1 or 2 short sentences. No paragraphs. 4. Reply in the user's language.`;
+            prompt = `Atue como um assistente pet amigável e casual. Escreva um resumo MUITO CURTO (MÁXIMO de 2 frases) para ${petContext.name} baseado nestes registros: ${JSON.stringify(logs)}. REGRAS CRÍTICAS: 1. Seja extremamente breve e informal. 2. NÃO USE termos médicos ou clínicos complexos. 3. LIMITE ESTRITO: Exatamente 1 ou 2 frases curtas. Sem parágrafos.`;
         }
 
         const result = await Promise.race([
@@ -282,15 +275,14 @@ STRICT REQUIREMENTS FOR AI:
 
         res.json({
             summary: result.insight || result.text || "Status: Logged. System sync in progress.",
-            isPremiumTier: isPremium === true
+            isPremiumTier: isUserPro
         });
     } catch (e) {
         console.error("Weekly Report Error:", e);
-        res.json({ summary: "Clinical Status: Stable. Update your logs to see more." });
+        res.json({ summary: "Status: Estável. Atualize os registros para ver mais." });
     }
 });
 
-// A PORTA DINÂMICA DA NUVEM FICA AQUI 👇
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 DailyPaw Backend online at port ${PORT}`);
