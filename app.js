@@ -67,12 +67,7 @@ function resetScannerModal() {
     }
     window.currentCapturedFile = null;
 }
-// Remove o '#' residual deixado pelo sistema de autenticação do Supabase
-window.addEventListener('load', () => {
-    if (window.location.hash === '#' || window.location.href.endsWith('#')) {
-        window.history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-});
+
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -187,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.setItem('activePetId', data.id);
                 localStorage.setItem('petProfile', JSON.stringify(data));
                 btn.textContent = i18n.saved;
-                setTimeout(() => window.location.href = 'dashboard.html', 500);
+                setTimeout(() => window.location.href = '/dashboard', 500);
 
             } catch (err) {
                 console.error("Critical onboarding failure:", err);
@@ -408,14 +403,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             allPets = petData || [];
 
             // 4. ROUTER: Force onboarding if no pets
-            const isOnboarding = window.location.pathname.includes('onboarding.html');
+            const isOnboarding = window.location.pathname.includes('onboarding');
             const isAddingNew = urlParams.get('new') === 'true';
 
             if (allPets.length === 0 && !isOnboarding) {
-                window.location.href = 'onboarding.html';
+                window.location.href = '/onboarding';
                 return;
             } else if (allPets.length > 0 && isOnboarding && !isAddingNew) {
-                window.location.href = 'dashboard.html';
+                window.location.href = '/dashboard';
                 return;
             }
             if (allPets.length === 0) return; // Safety halt
@@ -597,7 +592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // EXECUTION FLOW (DASHBOARD ONLY)
     // ==========================================
-    if (window.location.pathname.includes('dashboard.html')) {
+    if (window.location.pathname.includes('dashboard')) {
         await initUserData();
         if (!petProfile) return;
         await loadPetData();
@@ -638,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             addPetBtn.onclick = async (e) => {
                 e.preventDefault();
                 const allowed = await checkFeatureLimit('PET_REGISTRATION');
-                if (allowed) location.href = 'onboarding.html?new=true';
+                if (allowed) window.location.href = '/onboarding?new=true';
             };
         }
 
