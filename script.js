@@ -311,15 +311,15 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
         if (isGuestPage) {
             // SIGNED_IN is the primary event for cross-tab sync after email verification
             if (event === 'SIGNED_IN') {
-                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login). Redirecionando para Onboarding...");
+                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login). Redirecionando para Dashboard...");
                 
                 // Handle OAuth token cleanup if present
                 if (window.location.hash.includes('access_token')) {
                     window.history.replaceState(null, null, ' ');
                 }
 
-                // Immediately redirect to onboarding as per requirements
-                window.location.href = '/onboarding';
+                // Immediately redirect to dashboard (app.js router will triage)
+                window.location.href = '/dashboard';
             }
         }
     }
