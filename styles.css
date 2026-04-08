@@ -4424,3 +4424,16 @@ footer p {
 }
 
 
+
+/* --- Premium Weekly Report Styling --- */
+.weekly-report-paragraph {
+    font-size: 1.10rem;
+    line-height: 1.8;
+    color: #2D3632;
+    text-align: left;
+    white-space: pre-line; 
+    background: #F8FAFC;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #10B981;
+}
