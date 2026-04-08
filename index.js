@@ -277,6 +277,8 @@ STRICT REQUIREMENTS FOR AI:
 3. PARAGRAPH 2 (Nutrition): Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg).
 4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
 5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
+        } else {
+            prompt = `You are a casual, friendly pet assistant. Write a VERY SHORT, simple summary (MAXIMUM 2 sentences) for ${petContext.name} based on these logs: ${JSON.stringify(logs)}. CRITICAL RULES: 1. Keep it extremely brief and informal. 2. DO NOT use clinical, medical, or complex terminology (absolutely no words like 'macronutrient', 'lethargy', 'systemic'). 3. STRICT LIMIT: Exactly 1 or 2 short sentences. No paragraphs. 4. Reply in the user's language.`;
         }
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),
