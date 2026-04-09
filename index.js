@@ -209,18 +209,18 @@ app.post("/api/generate-weekly-report", async (req, res) => {
             return res.status(403).json({ error: limitCheck.error });
         }
 
-        const prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
-Pet Profile: ${JSON.stringify(petContext)}
-Daily Logs (7 days): ${JSON.stringify(logs)}
-Food Scanner Data: ${JSON.stringify(scans)}
-Recent Chat Context: ${JSON.stringify(chatHistory)}
+        const prompt = `Atue como um Patologista Clínico Veterinário Certificado. Você deve gerar o Relatório Semanal de Saúde com Inteligência Artificial para o paciente ${petContext.name}.
+Dados do Paciente: ${JSON.stringify(petContext)}
+Monitoramento Diário (Últimos 7 dias): ${JSON.stringify(logs)}
+Análise Fotográfica de Alimentos (Nutrição Recente): ${JSON.stringify(scans)}
+Contexto Recente do Chat Veterinário: ${JSON.stringify(chatHistory)}
 
-STRICT REQUIREMENTS FOR AI:
-1. FORMAT: Write EXACTLY 3 distinct paragraphs. You MUST use "\\n\\n" between paragraphs to ensure proper formatting on the frontend. Do NOT output a single block of text. Minimum 150 words total.
-2. PARAGRAPH 1 (Vitals): Analyze energy, appetite, and mood trends. Use strict clinical terminology (e.g., lethargy, anorexia, behavioral baseline, vital stability). Do not use emojis.
-3. PARAGRAPH 2 (Nutrition): Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg).
-4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
-5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
+REQUISITOS ESTRITOS (STRICT REQUIREMENTS):
+1. IDIOMA E TOM: Escreva EXATAMENTE e SOMENTE em Português (PT-BR). O tom deve ser excepcionalmente profissional, autoritativo e estritamente clínico. Não use gírias ou emojis (ex: NUNCA diga "Ei Rex, parece que...").
+2. FORMATO OBRIGATÓRIO: Escreva exata e claramente em 3 (três) parágrafos detalhados. Você DEVE separar cada parágrafo com uma dupla quebra de linha ("\\n\\n") para garantir o espaçamento correto no sistema. Seja detalhista, gerando um texto razoavelmente longo (mínimo de 180 palavras).
+3. PARÁGRAFO 1 (Sinais Vitais e Comportamento Clínico): Faça uma análise minuciosa das tendências de energia, apetite e humor usando vocabulário médico-veterinário avançado (ex. estado letárgico, inapetência transitória, estabilidade comportamental).
+4. PARÁGRAFO 2 (Nutrição e Sistema Gastrointestinal): Analise profundamente os dados nutricionais fornecidos no 'Food Scanner Data'. Correlacione o alimento ingerido com os macro-nutrientes ideais para a raça (${petContext.breed}), idade (${petContext.age}) e peso (${petContext.weight} kg).
+5. PARÁGRAFO 3 (Síntese Proativa e Recomendações): Forneça diretrizes profiláticas avançadas, indicando fatores de risco potenciais e síntese do estado geral baseada nos registros do chat e logs. Crie valor demonstrando a inteligência analítica do DailyPaw AI+.`;
 
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),

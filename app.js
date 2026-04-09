@@ -478,7 +478,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const existingReport = reports && reports.length > 0 ? reports[0] : null;
 
             if (existingReport) {
-                reportContainer.innerHTML = `<p class="weekly-report-paragraph">${existingReport.summary}</p>`;
+                const formattedHtml = existingReport.summary.split('\\n\\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\\n/g, '<br>')}</p>`).join('');
+                reportContainer.innerHTML = `<div class="ai-report-formatted">${formattedHtml}</div>`;
             } else {
                 reportContainer.innerHTML = `
                     <div class="ai-report-placeholder-premium" style="text-align: center; padding: 20px;">
@@ -731,15 +732,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.innerHTML = `<span>⏳</span> ${i18n.analyzing}`;
                 try {
                     const logs = await window.supabaseClient.from('daily_logs').select('*').eq('pet_id', activePetId).limit(7);
+                    const scansData = await window.supabaseClient.from('food_scans').select('*').eq('pet_id', activePetId).limit(5);
                     const response = await fetch(`${API_BASE}/api/generate-weekly-report`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userId: user.id, petContext: petProfile, logs: logs.data || [], chatHistory: getChatHistory() })
+                        body: JSON.stringify({ userId: user.id, petContext: petProfile, logs: logs.data || [], scans: scansData.data || [], chatHistory: getChatHistory() })
                     });
                     if (response.ok) {
                         const data = await response.json();
                         const reportContainer = document.getElementById('weekly-report-content');
                         if (reportContainer) {
-                            reportContainer.innerHTML = `<p class="weekly-report-paragraph">${data.summary}</p>`;
+                            const formattedHtml = data.summary.split('\\n\\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\\n/g, '<br>')}</p>`).join('');
+                            reportContainer.innerHTML = `<div class="ai-report-formatted">${formattedHtml}</div>`;
                         }
                         // Save so it loads automatically next time
                         const startOfWeekStr = getStartOfWeek().split('T')[0];
