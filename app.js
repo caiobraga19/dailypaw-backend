@@ -301,12 +301,52 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 🚫 THE HARD PAYWALL (PREMIUM ONLY SAAS) 🚫
             if (!userProfile.is_premium) {
                 document.body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; background:#F8FAFC; text-align:center; padding: 20px;">
-                        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 400px; width: 100%;">
-                            <h1 style="color:#2D3632; margin-bottom:12px; font-size: 1.5rem;">Acesso Exclusivo Premium 🐾</h1>
-                            <p style="color:#5A6B63; line-height:1.6; margin-bottom: 24px;">O DailyPaw agora é uma plataforma 100% premium. Assine para desbloquear análise clínica de alimentos, chat veterinário e relatórios de saúde.</p>
-                            <button id="global-checkout-btn" style="width: 100%; background:#10B981; color:white; border:none; padding:14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; transition: 0.2s;">Assinar DailyPaw</button>
-                            <button id="logout-paywall-btn" style="background:none; border:none; color:#8C9993; margin-top:20px; cursor:pointer; text-decoration:underline;">Sair da conta</button>
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family: 'Inter', sans-serif; background: #FAF8F5; text-align:center; padding: 20px;">
+                        <div style="background: #FFFFFF; border-radius: 28px; padding: 48px 36px; max-width: 440px; width: 100%; box-shadow: 0 20px 60px rgba(58, 90, 64, 0.12); border: 2px solid #3A5A40; position: relative;">
+                            
+                            <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #3A5A40; color: #FFFFFF; padding: 6px 20px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em;">All-Inclusive</div>
+                            
+                            <h2 style="font-size: 1.5rem; color: #3A5A40; text-align: left; margin-bottom: 8px;">DailyPaw AI+</h2>
+                            
+                            <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; text-align: left;">
+                                <span style="font-size: 1.2rem; color: #6B7B75; text-decoration: line-through;">$16.99</span>
+                                <span style="font-size: 3rem; font-weight: 700; color: #1A1F1D;">$12.99</span>
+                                <span style="font-size: 1rem; color: #6B7B75;">/ month</span>
+                            </div>
+                            
+                            <p style="text-align: left; color: #6B7B75; line-height: 1.5; margin-bottom: 32px; font-size: 0.95rem;">
+                                The ultimate AI-driven health intelligence for your best friend.
+                            </p>
+                            
+                            <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; text-align: left;">
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Unlimited AI Chat & Help
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Unlimited AI Food Scans
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Unlimited Daily Tracking
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Weekly Professional Reports
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Smart Clinical Guard (Alerts)
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Unlimited Pet Registration
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Unlimited Task Reminders
+                                </li>
+                                <li style="padding: 10px 0; font-size: 0.95rem; font-weight: 700; color: #1A1F1D; display: flex; align-items: center; gap: 12px;">
+                                    <span style="color: #10B981; background: rgba(16,185,129,0.1); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">✓</span> Advanced Medical Diagnostics
+                                </li>
+                            </ul>
+                            
+                            <button id="global-checkout-btn" style="width: 100%; background: #1A1F1D; color: #FFFFFF; border: none; padding: 16px; border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: transform 0.2s, background 0.2s;">Start AI+ Experience</button>
+                            <button id="logout-paywall-btn" style="width: 100%; background: none; border: none; color: #6B7B75; margin-top: 20px; cursor: pointer; font-size: 0.9rem; text-decoration: underline;">Log out</button>
                         </div>
                     </div>
                 `;
