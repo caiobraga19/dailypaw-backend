@@ -261,8 +261,162 @@ p {
 .hero-text .subtitle {
     color: rgba(255, 255, 255, 0.95);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    margin: 0 0 32px 0;
+    margin: 0 0 24px 0;
     text-align: left;
+}
+
+/* Hero Price Pill */
+.hero-price-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 12px 20px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-price-badge {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.hero-price-amount {
+    color: #FFFFFF;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.hero-price-old {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: line-through;
+    font-weight: 400;
+    margin-right: 4px;
+}
+
+.hero-price-period {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.hero-price-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+/* Post-Signup Pricing Card (inside modal) */
+.post-signup-container {
+    text-align: center;
+    padding: 12px 0;
+}
+
+.post-signup-pricing-card {
+    background: linear-gradient(145deg, #f0fdf4, #ecfdf5);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 24px 20px;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.post-signup-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #166534, #10B981);
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    margin-bottom: 16px;
+}
+
+.post-signup-price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.post-signup-old-price {
+    font-size: 1rem;
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.post-signup-price {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+}
+
+.post-signup-period {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.post-signup-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    text-align: left;
+}
+
+.post-signup-features li {
+    padding: 7px 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #166534;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+}
+
+.post-signup-features li:last-child {
+    border-bottom: none;
+}
+
+.post-signup-note {
+    font-size: 0.8rem !important;
+    color: var(--text-muted) !important;
+    font-style: italic;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .hero-price-pill {
+        gap: 8px;
+        padding: 10px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .hero-price-amount {
+        font-size: 1.3rem;
+    }
+
+    .post-signup-pricing-card {
+        padding: 20px 16px;
+    }
+
+    .post-signup-price {
+        font-size: 1.8rem;
+    }
 }
 
 /* Features */

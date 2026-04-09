@@ -39,11 +39,17 @@
             <div class="hero-content-wrapper">
                 <div class="hero-text">
                     <h1 class="reveal"> <span class="text-gradient">Smart care</span>,<br>designed for them.</h1>
-                    <p class="subtitle reveal" style="transition-delay: 0.2s;">The seamlessly integrated tracker that
-                        understands your
-                        best friend.</p>
+                    <p class="subtitle reveal" style="transition-delay: 0.2s;">AI-powered health intelligence that
+                        keeps your best friend thriving — every single day.</p>
+
+                    <div class="hero-price-pill reveal" style="transition-delay: 0.3s;">
+                        <span class="hero-price-badge">AI+</span>
+                        <span class="hero-price-amount"><span class="hero-price-old">$16.99</span> $12.99<span class="hero-price-period">/mo</span></span>
+                        <span class="hero-price-label">All-inclusive premium plan</span>
+                    </div>
+
                     <div class="hero-btns reveal" style="transition-delay: 0.4s;">
-                        <a href="#" data-auth="signup" class="btn-primary">Discover DailyPaw</a>
+                        <a href="#" data-auth="signup" class="btn-primary">Start Now — $12.99/mo</a>
                         <a href="#" data-auth="login" class="btn-outline"
                             style="color: #FFFFFF; border-color: rgba(255,255,255,0.4);">Log in</a>
                     </div>
@@ -319,19 +325,39 @@
                     </div>
                 </div>
 
-                <!-- Email Confirmation Pending -->
+                <!-- Email Confirmation + Subscribe Now -->
                 <div class="auth-form-container" id="email-pending-view">
-                    <div class="verification-loading-container">
-                        <div class="verification-spinner"></div>
+                    <div class="post-signup-container">
                         <div class="email-pulse-icon">
                             <span class="envelope-main">📧</span>
                             <span class="paw-badge">🐾</span>
                         </div>
-                        <h2 class="verification-message">Check your inbox!</h2>
-                        <p class="verification-subtext">We've sent a verification link to <strong id="pending-email-display">your email</strong>. Waiting for confirmation...</p>
+                        <h2 class="verification-message" style="font-size: 1.5rem;">Check your inbox!</h2>
+                        <p class="verification-subtext" style="margin-bottom: 24px;">We sent a verification link to <strong id="pending-email-display">your email</strong>.</p>
 
-                        <div class="confirmation-actions" style="margin-top: 32px;">
-                            <button type="button" class="btn-text" onclick="switchAuthMode('login')">Back to Login</button>
+                        <div class="post-signup-pricing-card">
+                            <div class="post-signup-badge">🐾 DailyPaw AI+</div>
+                            <div class="post-signup-price-row">
+                                <span class="post-signup-old-price">$16.99</span>
+                                <span class="post-signup-price">$12.99</span>
+                                <span class="post-signup-period">/ month</span>
+                            </div>
+                            <ul class="post-signup-features">
+                                <li>✓ Unlimited AI Chat & Help</li>
+                                <li>✓ Unlimited AI Food Scans</li>
+                                <li>✓ Weekly Professional Reports</li>
+                                <li>✓ Smart Clinical Guard (Alerts)</li>
+                                <li>✓ Unlimited Pet Registration</li>
+                                <li>✓ Advanced Medical Diagnostics</li>
+                            </ul>
+                            <p class="post-signup-note">You can verify your email later. Subscribe now to unlock everything instantly.</p>
+                        </div>
+
+                        <div class="confirmation-actions" style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+                            <button type="button" class="btn-primary w-100" onclick="handlePostSignupUpgrade()" style="height: 52px; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                                Subscribe Now
+                            </button>
+                            <button type="button" class="btn-text" onclick="switchAuthMode('login')" style="font-size: 0.9rem;">Back to Login</button>
                         </div>
                     </div>
                 </div>

@@ -250,6 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 console.log("[AUTH] Cadastro iniciado com sucesso! Aguardando confirmação...");
                 
+                // Save user ID to allow immediate Stripe checkout
+                if (data && data.user) {
+                    window.pendingUserId = data.user.id;
+                }
+
                 // Exibe o estado de "Awaiting Verification"
                 const pendingEmailEl = document.getElementById('pending-email-display');
                 if (pendingEmailEl) pendingEmailEl.textContent = email;
@@ -296,6 +301,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Handle upgrade immediately after signup
+window.handlePostSignupUpgrade = () => {
+    if (!window.pendingUserId) {
+        alert("User ID missing. Try logging in first.");
+        return;
+    }
+    window.location.href = `https://buy.stripe.com/test_14A3cucDceUU8UE2Hm5c400?client_reference_id=${window.pendingUserId}`;
+};
 
 // --- Global Auth Listener (Cross-Tab Sync & OAuth) ---
 window.supabaseClient.auth.onAuthStateChange((event, session) => {
