@@ -144,10 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Switch Auth Forms
     window.switchAuthMode = (mode) => {
         const pendingView = document.getElementById('email-pending-view');
+        const paywallView = document.getElementById('email-confirmed-paywall-view');
+        const authModalOverlay = document.getElementById('auth-modal-overlay');
 
         signupFormContainer.classList.remove('active');
         loginFormContainer.classList.remove('active');
         if (pendingView) pendingView.classList.remove('active');
+        if (paywallView) paywallView.classList.remove('active');
 
         if (mode === 'login') {
             loginFormContainer.classList.add('active');
@@ -155,6 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
             signupFormContainer.classList.add('active');
         } else if (mode === 'email-pending') {
             if (pendingView) pendingView.classList.add('active');
+        } else if (mode === 'email-confirmed-paywall-view') {
+            if (paywallView) paywallView.classList.add('active');
+        }
+
+        // Ensure the modal itself is open
+        if (authModalOverlay) {
+            authModalOverlay.classList.add('active');
         }
 
         // Clear old errors on switch
@@ -243,7 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { data, error } = await window.supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: fullName } }
+                    options: { 
+                        data: { full_name: fullName },
+                        emailRedirectTo: window.location.origin + window.location.pathname
+                    }
                 });
 
                 if (error) throw error;
@@ -312,7 +325,7 @@ window.handlePostSignupUpgrade = () => {
 };
 
 // --- Global Auth Listener (Cross-Tab Sync & OAuth) ---
-window.supabaseClient.auth.onAuthStateChange((event, session) => {
+window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log(`[AUTH] Evento detectado: ${event}`);
 
     // If a session is detected (especially via cross-tab sync or email confirmation)
@@ -325,15 +338,28 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
         if (isGuestPage) {
             // SIGNED_IN is the primary event for cross-tab sync after email verification
             if (event === 'SIGNED_IN') {
-                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login). Redirecionando para Dashboard...");
+                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login).");
                 
                 // Handle OAuth token cleanup if present
                 if (window.location.hash.includes('access_token')) {
                     window.history.replaceState(null, null, ' ');
                 }
 
-                // Immediately redirect to dashboard (app.js router will triage)
-                window.location.href = '/dashboard';
+                try {
+                    // Check if user is premium
+                    const { data: profile } = await window.supabaseClient.from('profiles').select('is_premium').eq('id', session.user.id).single();
+                    
+                    if (profile?.is_premium) {
+                        window.location.href = '/dashboard';
+                    } else {
+                        // Ensure window.pendingUserId is set correctly for Stripe checkout
+                        window.pendingUserId = session.user.id;
+                        // Elegant Paywall Reveal!
+                        switchAuthMode('email-confirmed-paywall-view');
+                    }
+                } catch (e) {
+                    window.location.href = '/dashboard';
+                }
             }
         }
     }

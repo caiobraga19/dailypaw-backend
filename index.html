@@ -325,40 +325,53 @@
                     </div>
                 </div>
 
-                <!-- Email Confirmation + Subscribe Now -->
+                <!-- Email Confirmation Pending (Simple) -->
                 <div class="auth-form-container" id="email-pending-view">
-                    <div class="post-signup-container">
+                    <div class="verification-loading-container" style="text-align: center; padding: 20px 0;">
                         <div class="email-pulse-icon">
                             <span class="envelope-main">📧</span>
                             <span class="paw-badge">🐾</span>
                         </div>
                         <h2 class="verification-message" style="font-size: 1.5rem;">Check your inbox!</h2>
-                        <p class="verification-subtext" style="margin-bottom: 24px;">We sent a verification link to <strong id="pending-email-display">your email</strong>.</p>
-
-                        <div class="post-signup-pricing-card">
-                            <div class="post-signup-badge">🐾 DailyPaw AI+</div>
-                            <div class="post-signup-price-row">
-                                <span class="post-signup-old-price">$16.99</span>
-                                <span class="post-signup-price">$12.99</span>
-                                <span class="post-signup-period">/ month</span>
-                            </div>
-                            <ul class="post-signup-features">
-                                <li>✓ Unlimited AI Chat & Help</li>
-                                <li>✓ Unlimited AI Food Scans</li>
-                                <li>✓ Weekly Professional Reports</li>
-                                <li>✓ Smart Clinical Guard (Alerts)</li>
-                                <li>✓ Unlimited Pet Registration</li>
-                                <li>✓ Advanced Medical Diagnostics</li>
-                            </ul>
-                            <p class="post-signup-note">You can verify your email later. Subscribe now to unlock everything instantly.</p>
+                        <p class="verification-subtext" style="margin-bottom: 24px; color: #6B7B75;">We sent a verification link to <strong id="pending-email-display">your email</strong>. Please click the link to confirm.</p>
+                        
+                        <div class="confirmation-actions" style="margin-top: 32px;">
+                            <button type="button" class="btn-text" onclick="switchAuthMode('login')">Back to Login</button>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="confirmation-actions" style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
-                            <button type="button" class="btn-primary w-100" onclick="handlePostSignupUpgrade()" style="height: 52px; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
-                                Subscribe Now
-                            </button>
-                            <button type="button" class="btn-text" onclick="switchAuthMode('login')" style="font-size: 0.9rem;">Back to Login</button>
+                <!-- Post-Confirmation Paywall (Elegant) -->
+                <div class="auth-form-container" id="email-confirmed-paywall-view" style="padding: 10px 0;">
+                    <div class="post-signup-pricing-card" style="box-shadow: none; border-color: transparent; background: transparent; padding: 0;">
+                        <div class="post-signup-badge" style="margin-bottom: 12px;">All-Inclusive</div>
+                        <h2 style="font-size: 1.8rem; color: #1A1F1D; text-align: center; margin-bottom: 16px;">DailyPaw AI+</h2>
+                        
+                        <div class="post-signup-price-row" style="margin-bottom: 24px;">
+                            <span class="post-signup-old-price" style="font-size: 1.2rem;">$16.99</span>
+                            <span class="post-signup-price" style="font-size: 2.8rem;">$12.99</span>
+                            <span class="post-signup-period" style="font-size: 1rem;">/ month</span>
                         </div>
+                        
+                        <p style="color: #6B7B75; line-height: 1.5; margin-bottom: 24px; text-align: center;">
+                            The ultimate AI-driven health intelligence for your best friend.
+                        </p>
+                        
+                        <ul class="post-signup-features" style="margin-bottom: 32px;">
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Unlimited AI Chat & Help</li>
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Unlimited AI Food Scans</li>
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Weekly Professional Reports</li>
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Smart Clinical Guard (Alerts)</li>
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Unlimited Pet Registration</li>
+                            <li style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 10px 0; color: #1A1F1D; font-weight: 600;"><span style="color: #10B981; margin-right: 8px;">✓</span> Advanced Medical Diagnostics</li>
+                        </ul>
+                        
+                        <button type="button" class="btn-primary w-100" id="post-confirm-subscribe-btn" onclick="handlePostSignupUpgrade()" style="background: #1A1F1D; color: #FFFFFF; height: 56px; font-size: 1.15rem; border-radius: 30px; box-shadow: 0 8px 24px rgba(26,31,29,0.25);">
+                            Start AI+ Experience
+                        </button>
+                        <button type="button" class="btn-text" onclick="window.supabaseClient.auth.signOut(); switchAuthMode('login')" style="margin-top: 16px; font-size: 0.9rem; color: #6B7B75;">
+                            Sign out
+                        </button>
                     </div>
                 </div>
 
