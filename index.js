@@ -127,48 +127,12 @@ app.get("/signup", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// --- BACKEND GATING UTILITY ---
-async function checkBackendLimit(userId, feature) {
-    if (!userId) return { allowed: false, error: "Identification failed" };
-
-    const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('is_premium')
-        .eq('id', userId)
-        .single();
-
-    if (profile?.is_premium) return { allowed: true };
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tableMap = {
-        'CHAT': 'chat_logs',
-        'SCAN': 'food_scans'
-    };
-
-    const table = tableMap[feature];
-    if (!table) return { allowed: true };
-
-    let query = supabaseAdmin
-        .from(table)
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .gte('created_at', today.toISOString());
-
-    if (feature === 'CHAT') {
-        query = query.eq('role', 'user');
-    }
-
-    const { count } = await query;
-
-    if (feature === 'CHAT' && count > 1) {
-        return { allowed: false, error: "Daily limit reached for Free Tier. Upgrade to AI+ for unlimited access." };
-    } else if (feature === 'SCAN' && count >= 1) {
-        return { allowed: false, error: "Daily limit reached for Free Tier. Upgrade to AI+ for unlimited access." };
-    }
-
-    return { allowed: true };
+// --- PREMIUM-ONLY ACCESS ENFORCEMENT ---
+async function enforcePremiumAccess(userId) {
+    if (!userId) return { allowed: false, error: "Identification failed." };
+    const { data: profile } = await supabaseAdmin.from('profiles').select('is_premium').eq('id', userId).single();
+    if (profile?.is_premium === true) return { allowed: true };
+    return { allowed: false, error: "Access Denied: Active subscription required." };
 }
 
 let transport;
@@ -186,7 +150,7 @@ app.post("/api/analyze", async (req, res) => {
     if (isBusy) return res.status(503).json({ error: "BUSY" });
 
     const { userId, image, mimeType, petData } = req.body;
-    const limitCheck = await checkBackendLimit(userId, 'SCAN');
+    const limitCheck = await enforcePremiumAccess(userId);
     if (!limitCheck.allowed) {
         return res.status(403).json({ error: limitCheck.error });
     }
@@ -206,7 +170,7 @@ app.post("/api/chat", async (req, res) => {
     if (isBusy) return res.status(503).json({ error: "BUSY" });
 
     const { message, context, history, userId } = req.body;
-    const limitCheck = await checkBackendLimit(userId, 'CHAT');
+    const limitCheck = await enforcePremiumAccess(userId);
     if (!limitCheck.allowed) {
         return res.status(403).json({ error: limitCheck.error });
     }
@@ -238,21 +202,14 @@ Instructions:
 
 app.post("/api/generate-weekly-report", async (req, res) => {
     try {
-        const { userId, isPremium, petContext, logs, scans, chatHistory } = req.body;
+        const { userId, petContext, logs, scans, chatHistory } = req.body;
 
-        // TRAVA 100% BLINDADA: Validando o status diretamente pelo banco de dados também
-        const { data: profile } = await supabaseAdmin
-            .from('profiles')
-            .select('is_premium')
-            .eq('id', userId)
-            .single();
+        const limitCheck = await enforcePremiumAccess(userId);
+        if (!limitCheck.allowed) {
+            return res.status(403).json({ error: limitCheck.error });
+        }
 
-        const isUserPro = profile?.is_premium === true;
-
-        let prompt = "";
-
-        if (isUserPro) {
-            prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
+        const prompt = `Act as a Board-Certified Veterinary Clinical Pathologist. Generate a Comprehensive Professional Weekly Health Synthesis for ${petContext.name}.
 Pet Profile: ${JSON.stringify(petContext)}
 Daily Logs (7 days): ${JSON.stringify(logs)}
 Food Scanner Data: ${JSON.stringify(scans)}
@@ -264,9 +221,6 @@ STRICT REQUIREMENTS FOR AI:
 3. PARAGRAPH 2 (Nutrition): Deeply analyze the food scanner data. Correlate macro-nutrients and dietary patterns with the pet's breed (${petContext.breed}), age (${petContext.age}), and weight (${petContext.weight} kg).
 4. PARAGRAPH 3 (Synthesis): Provide advanced proactive care instructions, potential risk factors to watch, and psychological/behavioral synthesis.
 5. TONE: Highly professional, authoritative, and clinical. Absolutely no casual language like "feeling a little low".`;
-        } else {
-            prompt = `Atue como um assistente pet amigável e casual. Escreva um resumo MUITO CURTO (MÁXIMO de 2 frases) para ${petContext.name} baseado nestes registros: ${JSON.stringify(logs)}. REGRAS CRÍTICAS: 1. Seja extremamente breve e informal. 2. NÃO USE termos médicos ou clínicos complexos. 3. LIMITE ESTRITO: Exatamente 1 ou 2 frases curtas. Sem parágrafos.`;
-        }
 
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),
@@ -275,7 +229,7 @@ STRICT REQUIREMENTS FOR AI:
 
         res.json({
             summary: result.insight || result.text || "Status: Logged. System sync in progress.",
-            isPremiumTier: isUserPro
+            isPremiumTier: true
         });
     } catch (e) {
         console.error("Weekly Report Error:", e);

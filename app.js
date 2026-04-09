@@ -396,6 +396,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 2. FETCH PROFILE
             const { data: profileData } = await window.supabaseClient.from('profiles').select('*').eq('id', user.id).single();
             userProfile = profileData || { is_premium: false };
+
+            // 🚫 THE HARD PAYWALL (PREMIUM ONLY SAAS) 🚫
+            if (!userProfile.is_premium) {
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; background:#F8FAFC; text-align:center; padding: 20px;">
+                        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 400px; width: 100%;">
+                            <h1 style="color:#2D3632; margin-bottom:12px; font-size: 1.5rem;">Acesso Exclusivo Premium 🐾</h1>
+                            <p style="color:#5A6B63; line-height:1.6; margin-bottom: 24px;">O DailyPaw agora é uma plataforma 100% premium. Assine para desbloquear análise clínica de alimentos, chat veterinário e relatórios de saúde.</p>
+                            <button id="global-checkout-btn" style="width: 100%; background:#10B981; color:white; border:none; padding:14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; transition: 0.2s;">Assinar DailyPaw</button>
+                            <button id="logout-paywall-btn" style="background:none; border:none; color:#8C9993; margin-top:20px; cursor:pointer; text-decoration:underline;">Sair da conta</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('global-checkout-btn').addEventListener('click', function() {
+                    this.textContent = "Iniciando Checkout Seguro...";
+                    this.style.opacity = "0.7";
+                    window.location.href = `https://buy.stripe.com/test_14A3cucDceUU8UE2Hm5c400?client_reference_id=${user.id}`;
+                });
+                
+                document.getElementById('logout-paywall-btn').addEventListener('click', async () => {
+                    await window.supabaseClient.auth.signOut();
+                    window.location.href = 'index.html';
+                });
+                return; // CRITICAL: Halts further execution (no dashboard/onboarding loading)
+            }
+
             renderPlanSection(userProfile.is_premium);
 
             // 3. FETCH PETS
@@ -422,9 +449,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             petProfile = allPets.find(p => p.id === activePetId);
             localStorage.setItem('petProfile', JSON.stringify(petProfile));
-
-            // 6. APPLY UI STATES
-            applyGatingUI(userProfile.is_premium);
 
         } catch (error) {
             console.error("Initialization Failed:", error);
@@ -512,16 +536,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: reports } = await window.supabaseClient.from('weekly_reports').select('*').eq('pet_id', activePetId).eq('week_start', startOfWeekStr).order('created_at', { ascending: false }).limit(1);
             const existingReport = reports && reports.length > 0 ? reports[0] : null;
 
-            const isPremium = userProfile?.is_premium;
-            const upsellHTML = !isPremium ? `
-                <div class="report-upsell-banner" style="margin-top: 16px; background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 12px; text-align: center;">
-                    <p style="color: #1e40af; font-size: 0.9rem; margin-bottom: 12px; font-weight: 500;">Atualize para o AI+ para obter uma análise clínica profissional.</p>
-                    <button class="btn-upsell-cta" onclick="handleUpgrade()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Upgrade to AI+</button>
-                </div>
-            ` : '';
-
             if (existingReport) {
-                reportContainer.innerHTML = `<p class="weekly-report-paragraph">${existingReport.summary}</p>${upsellHTML}`;
+                reportContainer.innerHTML = `<p class="weekly-report-paragraph">${existingReport.summary}</p>`;
             } else {
                 reportContainer.innerHTML = `
                     <div class="ai-report-placeholder-premium" style="text-align: center; padding: 20px;">
@@ -776,20 +792,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const logs = await window.supabaseClient.from('daily_logs').select('*').eq('pet_id', activePetId).limit(7);
                     const response = await fetch(`${API_BASE}/api/generate-weekly-report`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userId: user.id, isPremium: userProfile?.is_premium || false, petContext: petProfile, logs: logs.data || [], chatHistory: getChatHistory() })
+                        body: JSON.stringify({ userId: user.id, petContext: petProfile, logs: logs.data || [], chatHistory: getChatHistory() })
                     });
                     if (response.ok) {
                         const data = await response.json();
                         const reportContainer = document.getElementById('weekly-report-content');
                         if (reportContainer) {
-                            const isPremium = userProfile?.is_premium;
-                            const upsellHTML = !isPremium ? `
-                                <div class="report-upsell-banner" style="margin-top: 16px; background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 12px; text-align: center;">
-                                    <p style="color: #1e40af; font-size: 0.9rem; margin-bottom: 12px; font-weight: 500;">Atualize para o AI+ para obter uma análise clínica profissional.</p>
-                                    <button class="btn-upsell-cta" onclick="handleUpgrade()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Upgrade to AI+</button>
-                                </div>
-                            ` : '';
-                            reportContainer.innerHTML = `<p class="weekly-report-paragraph">${data.summary}</p>${upsellHTML}`;
+                            reportContainer.innerHTML = `<p class="weekly-report-paragraph">${data.summary}</p>`;
                         }
                         // Save so it loads automatically next time
                         const startOfWeekStr = getStartOfWeek().split('T')[0];
