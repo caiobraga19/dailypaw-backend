@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const titleEl = document.getElementById('limit-modal-title');
         const messageEl = document.getElementById('limit-modal-message');
         if (titleEl) titleEl.textContent = `${feature} Limit Reached`;
-        if (messageEl) messageEl.textContent = message || "You've reached your Free tier limit. Upgrade to AI+ for unlimited access.";
+        if (messageEl) messageEl.textContent = message || "Access Denied: Active subscription required.";
         if (modal) modal.classList.add('active');
     }
 
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     break;
                 case 'AI_CHAT':
                     const { count: chatCount } = await window.supabaseClient.from('chat_logs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('role', 'user').gte('created_at', startOfDayISO);
-                    if (chatCount >= 1) { showUpgradeModal('AI Chat', "Free tier allows 1 AI message per day."); return false; }
+                    if (chatCount >= 1) { showUpgradeModal('AI Chat', "Active subscription required for AI Chat."); return false; }
                     break;
                 case 'FOOD_SCAN':
                     const { count: scanCount } = await window.supabaseClient.from('food_scans').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', startOfDayISO);
