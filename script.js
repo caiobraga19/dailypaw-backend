@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Dynamic Checkout & Plan State ---
-let selectedPlan = 'free'; // Default state
+let selectedPlan = 'premium'; // Premium-only SaaS
 
 // --- Authentication Modal Logic ---
 document.addEventListener('DOMContentLoaded', () => {

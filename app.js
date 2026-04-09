@@ -55,9 +55,7 @@ function resetScannerModal() {
     if (scanFoodBtn) {
         scanFoodBtn.style.display = 'flex';
         scanFoodBtn.disabled = false;
-        if (!scanFoodBtn.classList.contains('feature-locked')) {
-            scanFoodBtn.innerHTML = '<span>📸</span> Scan Food';
-        }
+        scanFoodBtn.innerHTML = '<span>📸</span> Scan Food';
     }
     if (cameraInput) cameraInput.value = '';
     if (contextInput) contextInput.value = '';
@@ -265,123 +263,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- RESTAURAÇÃO DA LISTA COMPLETA DE VANTAGENS ---
-    function renderPlanSection(isPremium) {
+    // --- PLAN SECTION (PREMIUM ONLY) ---
+    function renderPlanSection() {
         const container = document.getElementById('plan-content-area');
         if (!container) return;
-
-        if (isPremium) {
-            const planNameEl = document.getElementById('current-plan-name');
-            if (planNameEl) planNameEl.textContent = 'AI+';
-            container.innerHTML = `
-                <div class="plan-state-premium transition-fade">
-                    <div class="plan-info-pill"><div><div class="plan-label">Current Plan</div><div class="plan-name">DailyPaw AI+</div></div></div>
-                    <div class="premium-active-badge"><span>Active Subscription</span><span class="premium-check-icon">✓</span></div>
-                    <div class="billing-info"><p>Status: <span style="color: #10B981; font-weight: 600;">Renews automatically</span></p></div>
-                    <button class="cancel-subscription-link" onclick="handleCancelSubscription()">Cancel Subscription</button>
-                </div>`;
-        } else {
-            const planNameEl = document.getElementById('current-plan-name');
-            if (planNameEl) planNameEl.textContent = 'Free';
-            container.innerHTML = `
-                <div class="plan-state-free transition-fade">
-                    <div class="plan-info-pill">
-                        <div>
-                            <div class="plan-label">Current Plan</div>
-                            <div class="plan-name">DailyPaw Free</div>
-                        </div>
-                    </div>
-                    <ul class="upgrade-promo-list" style="margin: 16px 0; padding-left: 20px; font-size: 0.85rem; color: #5A6B63;">
-                        <li style="margin-bottom: 6px;">AI Chat (1 message / day)</li>
-                        <li style="margin-bottom: 6px;">Basic Weekly Reports</li>
-                        <li style="margin-bottom: 6px;">Tracking & Reminders (Limited)</li>
-                        <li class="premium-lock" style="margin-top: 12px; color: #C53030; font-weight: 600; list-style: none; margin-left: -20px;">🔓 Upgrade to unlock Unlimited Scans & Clinical Guard</li>
-                    </ul>
-                    <button class="upgrade-btn" onclick="handleUpgrade()" style="width: 100%; padding: 10px; background: #10B981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">Upgrade to AI+ Experience</button>
-                </div>`;
-        }
+        const planNameEl = document.getElementById('current-plan-name');
+        if (planNameEl) planNameEl.textContent = 'AI+';
+        container.innerHTML = `
+            <div class="plan-state-premium transition-fade">
+                <div class="plan-info-pill"><div><div class="plan-label">Current Plan</div><div class="plan-name">DailyPaw AI+</div></div></div>
+                <div class="premium-active-badge"><span>Active Subscription</span><span class="premium-check-icon">✓</span></div>
+                <div class="billing-info"><p>Status: <span style="color: #10B981; font-weight: 600;">Renews automatically</span></p></div>
+                <button class="cancel-subscription-link" onclick="handleCancelSubscription()">Cancel Subscription</button>
+            </div>`;
     }
 
-    function showUpgradeModal(feature, message) {
-        const modal = document.getElementById('premium-limit-modal');
-        const titleEl = document.getElementById('limit-modal-title');
-        const messageEl = document.getElementById('limit-modal-message');
-        if (titleEl) titleEl.textContent = `${feature} Limit Reached`;
-        if (messageEl) messageEl.textContent = message || "Access Denied: Active subscription required.";
-        if (modal) modal.classList.add('active');
-    }
-
+    // Premium-only: all features always allowed
     async function checkFeatureLimit(feature) {
-        if (!user) return false;
-        if (!userProfile) {
-            try {
-                const { data: freshProfile } = await window.supabaseClient.from('profiles').select('is_premium').eq('id', user.id).single();
-                if (freshProfile) userProfile = freshProfile;
-            } catch (err) { }
-        }
-        if (userProfile?.is_premium) return true;
-
-        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0); const startOfDayISO = todayStart.toISOString();
-        try {
-            switch (feature) {
-                case 'PET_REGISTRATION':
-                    const { count: petCount } = await window.supabaseClient.from('pets').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
-                    if (petCount >= 1) { showUpgradeModal('Pet Registration', "Free users can only register 1 pet."); return false; }
-                    break;
-                case 'AI_CHAT':
-                    const { count: chatCount } = await window.supabaseClient.from('chat_logs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('role', 'user').gte('created_at', startOfDayISO);
-                    if (chatCount >= 1) { showUpgradeModal('AI Chat', "Active subscription required for AI Chat."); return false; }
-                    break;
-                case 'FOOD_SCAN':
-                    const { count: scanCount } = await window.supabaseClient.from('food_scans').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', startOfDayISO);
-                    if (scanCount >= 1) { showUpgradeModal('Food Scanner', "Free users get 1 nutritional scan per day."); return false; }
-                    break;
-                case 'REMINDERS':
-                    const { count: remCount } = await window.supabaseClient.from('reminders').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'pending');
-                    if (remCount >= 1) { showUpgradeModal('Reminders', "Free users can have 1 active reminder."); return false; }
-                    break;
-                case 'AI_INSIGHTS':
-                    showUpgradeModal('Health Insights', "Upgrade to AI+ to access clinical telemetry and professional health insights.");
-                    return false;
-                default: return true;
-            }
-            return true;
-        } catch (err) { return false; }
+        return true;
     }
     window.checkFeatureLimit = checkFeatureLimit;
-
-    function applyGatingUI(isPremium) {
-        const proOnlySections = [{ id: 'btn-health-insights', title: 'Clinical Guard' }];
-        proOnlySections.forEach(section => {
-            const el = document.getElementById(section.id);
-            if (!el) return;
-            const existingOverlay = el.querySelector('.locked-card-overlay');
-            if (existingOverlay) existingOverlay.remove();
-            if (!isPremium) {
-                el.classList.add('feature-locked');
-                const overlay = document.createElement('div'); overlay.className = 'locked-card-overlay';
-                overlay.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showUpgradeModal(section.title, `${section.title} is exclusive to AI+ members.`); };
-                el.style.position = 'relative'; el.appendChild(overlay);
-            } else {
-                el.classList.remove('feature-locked'); el.style.position = '';
-            }
-        });
-
-        const scanFoodBtn = document.getElementById('scan-food-btn');
-        if (scanFoodBtn && !isPremium) {
-            const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-            window.supabaseClient.from('food_scans').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', todayStart.toISOString()).then(({ count }) => {
-                const existingOverlay = scanFoodBtn.querySelector('.locked-card-overlay');
-                if (existingOverlay) existingOverlay.remove();
-                if (count >= 1) {
-                    scanFoodBtn.classList.add('feature-locked');
-                    const overlay = document.createElement('div'); overlay.className = 'locked-card-overlay';
-                    overlay.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showUpgradeModal('Food Scanner', "Upgrade to AI+ for unlimited scans!"); };
-                    scanFoodBtn.style.position = 'relative'; scanFoodBtn.appendChild(overlay);
-                } else { scanFoodBtn.classList.remove('feature-locked'); scanFoodBtn.style.position = ''; }
-            });
-        }
-    }
 
     // --- CORE INITIALIZATION (FAST LOAD) ---
     async function initUserData() {
@@ -423,7 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return; // CRITICAL: Halts further execution (no dashboard/onboarding loading)
             }
 
-            renderPlanSection(userProfile.is_premium);
+            renderPlanSection();
 
             // 3. FETCH PETS
             const { data: petData } = await window.supabaseClient.from('pets').select('*').eq('owner_id', user.id);
@@ -932,9 +833,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!confirm("Are you sure you want to cancel your AI+ subscription?")) return;
             try {
                 await window.supabaseClient.from('profiles').update({ is_premium: false }).eq('id', user.id);
-                userProfile.is_premium = false;
-                renderPlanSection(false);
-                alert("Subscription cancelled.");
+                alert("Subscription cancelled. You will be redirected.");
+                window.location.reload(); // Reload triggers the hard paywall
             } catch (err) { alert("Cancellation failed."); }
         };
 
