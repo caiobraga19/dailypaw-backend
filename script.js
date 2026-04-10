@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     password,
                     options: { 
                         data: { full_name: fullName },
-                        emailRedirectTo: window.location.origin + window.location.pathname
+                        emailRedirectTo: window.location.origin + '/paywall.html'
                     }
                 });
 
@@ -352,10 +352,8 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
                     if (profile?.is_premium) {
                         window.location.href = '/dashboard';
                     } else {
-                        // Ensure window.pendingUserId is set correctly for Stripe checkout
-                        window.pendingUserId = session.user.id;
-                        // Elegant Paywall Reveal!
-                        switchAuthMode('email-confirmed-paywall-view');
+                        // Redirect directly to the standalone paywall screen
+                        window.location.href = '/paywall.html';
                     }
                 } catch (e) {
                     window.location.href = '/dashboard';
