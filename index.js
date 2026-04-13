@@ -109,7 +109,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
             payment_method_types: ['card'],
             client_reference_id: userId,
             line_items: [{
-                price: 'ID_DO_SEU_PRECO_AQUI',
+                price: 'price_1THxUOCmBAQHtARwas7vSeks',
                 quantity: 1,
             }],
             mode: 'subscription',
