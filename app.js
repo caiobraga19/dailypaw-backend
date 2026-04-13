@@ -117,36 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ageInput) ageInput.addEventListener('input', validateForm);
         if (weightInput) weightInput.addEventListener('input', validateForm);
 
-        const breedDropdown = document.getElementById('breed-dropdown');
-
-        if (breedInput && breedDropdown) {
-            // Dropdown Focus & Filter logic
-            breedInput.addEventListener('focus', () => {
-                if (breedDropdown.children.length > 0) breedDropdown.style.display = 'block';
-            });
-            
-            breedInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                let hasVisible = false;
-                Array.from(breedDropdown.children).forEach(item => {
-                    if (item.textContent.toLowerCase().includes(term)) {
-                        item.style.display = 'block';
-                        hasVisible = true;
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-                breedDropdown.style.display = hasVisible ? 'block' : 'none';
-                validateForm();
-            });
-
-            // Close when clicking outside
-            document.addEventListener('click', (e) => {
-                if (e.target !== breedInput && !breedDropdown.contains(e.target)) {
-                    breedDropdown.style.display = 'none';
-                }
-            });
-        }
+        const breedDatalist = document.getElementById('breed-options');
 
         document.querySelectorAll('.species-card').forEach(card => {
             card.addEventListener('click', function () {
@@ -155,28 +126,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.selectedSpecies = this.dataset.value;
                 if (speciesInput) speciesInput.value = window.selectedSpecies;
                 
-                // --- ONBOARDING BREED DYNAMIC LOGIC ---
-                if (breedInput && breedDropdown) {
+                // --- ONBOARDING BREED DYNAMIC LOGIC (DATALIST) ---
+                if (breedInput && breedDatalist) {
                     const breedsData = {
-                        Dog: ['Pitbull', 'Labrador', 'Golden Retriever', 'Poodle', 'Bulldog', 'German Shepherd', 'Mixed', 'Other'],
-                        Cat: ['Persian', 'Siamese', 'Maine Coon', 'Sphynx', 'Bengal', 'Mixed', 'Other'],
-                        Bird: ['Parrot', 'Canary', 'Cockatiel', 'Other'],
-                        Other: ['Other']
+                        Dog: ["Affenpinscher", "Afghan Hound", "Airedale Terrier", "Akita", "Alaskan Malamute", "American Bulldog", "American Pit Bull Terrier", "American Staffordshire Terrier", "Anatolian Shepherd", "Australian Cattle Dog", "Australian Shepherd", "Basset Hound", "Beagle", "Belgian Malinois", "Bernese Mountain Dog", "Bichon Frise", "Bloodhound", "Border Collie", "Border Terrier", "Boston Terrier", "Boxer", "Boykin Spaniel", "Brittany", "Brussels Griffon", "Bull Terrier", "Bulldog", "Bullmastiff", "Cairn Terrier", "Cane Corso", "Cardigan Welsh Corgi", "Cavalier King Charles Spaniel", "Chesapeake Bay Retriever", "Chihuahua", "Chinese Crested", "Chinese Shar-Pei", "Chow Chow", "Collie", "Coonhound", "Corgi", "Cotons de Tulear", "Dachshund", "Dalmatian", "Doberman Pinscher", "Dogo Argentino", "English Cocker Spaniel", "English Mastiff", "English Setter", "English Springer Spaniel", "English Toy Spaniel", "French Bulldog", "German Shepherd", "German Shorthaired Pointer", "German Wirehaired Pointer", "Giant Schnauzer", "Golden Retriever", "Gordon Setter", "Great Dane", "Great Pyrenees", "Greyhound", "Havanese", "Irish Setter", "Irish Wolfhound", "Italian Greyhound", "Jack Russell Terrier", "Japanese Chin", "Keeshond", "Kerry Blue Terrier", "Labradoodle", "Labrador Retriever", "Lhasa Apso", "Maltese", "Mastiff", "Miniature Pinscher", "Miniature Schnauzer", "Newfoundland", "Norfolk Terrier", "Norwegian Elkhound", "Papillon", "Pekingese", "Pembroke Welsh Corgi", "Pit Bull", "Pomeranian", "Poodle", "Portuguese Water Dog", "Pug", "Rhodesian Ridgeback", "Rottweiler", "Saint Bernard", "Saluki", "Samoyed", "Schipperke", "Scottish Deerhound", "Scottish Terrier", "Shetland Sheepdog", "Shiba Inu", "Shih Tzu", "Siberian Husky", "Staffordshire Bull Terrier", "Standard Schnauzer", "Tibetan Mastiff", "Tibetan Terrier", "Vizsla", "Weimaraner", "Welsh Terrier", "West Highland White Terrier", "Whippet", "Yorkshire Terrier", "Mixed / Mutt"],
+                        Cat: ["Abyssinian", "American Bobtail", "American Curl", "American Shorthair", "American Wirehair", "Balinese", "Bengal", "Birman", "Bombay", "British Shorthair", "Burmese", "Burmilla", "Chartreux", "Colorpoint Shorthair", "Cornish Rex", "Devon Rex", "Domestic Longhair", "Domestic Mediumhair", "Domestic Shorthair", "Egyptian Mau", "European Shorthair", "Exotic Shorthair", "Havana Brown", "Himalayan", "Japanese Bobtail", "Khao Manee", "Korat", "LaPerm", "Maine Coon", "Manx", "Munchkin", "Nebelung", "Norwegian Forest Cat", "Ocicat", "Oriental", "Persian", "Peterbald", "Pixie-bob", "Ragamuffin", "Ragdoll", "Russian Blue", "Savannah", "Scottish Fold", "Selkirk Rex", "Siamese", "Siberian", "Singapura", "Snowshoe", "Somali", "Sphynx", "Tonkinese", "Turkish Angora", "Turkish Van", "Mixed"],
+                        Bird: ["African Grey Parrot", "Amazon Parrot", "Budgerigar (Parakeet)", "Caique", "Canary", "Cockatiel", "Cockatoo", "Conure", "Dove", "Eclectus Parrot", "Finch", "Lorikeet", "Lovebird", "Macaw", "Parrotlet", "Pigeon", "Quaker Parrot", "Toucan"],
+                        Other: []
                     };
-                    const availableBreeds = breedsData[window.selectedSpecies] || ['Other'];
+                    const availableBreeds = breedsData[window.selectedSpecies] || [];
                     breedInput.value = ''; // Reset on change
-                    breedDropdown.innerHTML = ''; // Clear old list
+                    breedDatalist.innerHTML = ''; // Clear old list
                     
                     availableBreeds.forEach(breed => {
-                        const div = document.createElement('div');
-                        div.className = 'breed-dropdown-item';
-                        div.textContent = breed;
-                        div.addEventListener('click', () => {
-                            breedInput.value = breed;
-                            breedDropdown.style.display = 'none';
-                            validateForm();
-                        });
-                        breedDropdown.appendChild(div);
+                        const option = document.createElement('option');
+                        option.value = breed;
+                        breedDatalist.appendChild(option);
                     });
                 }
                 
