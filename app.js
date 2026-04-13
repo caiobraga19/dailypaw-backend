@@ -117,7 +117,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ageInput) ageInput.addEventListener('input', validateForm);
         if (weightInput) weightInput.addEventListener('input', validateForm);
 
-        const breedDatalist = document.getElementById('breed-options');
+        const breedOverlay = document.getElementById('breed-modal-overlay');
+        const closeBreedModal = document.getElementById('close-breed-modal');
+        const breedSearchInputInner = document.getElementById('breed-search-input');
+        const breedOptionsContainer = document.getElementById('breed-options-container');
+        const customBreedInput = document.getElementById('custom-breed-input');
+        const useCustomBreedBtn = document.getElementById('use-custom-breed-btn');
+
+        if (breedInput && breedOverlay) {
+            // Open Modal
+            breedInput.addEventListener('click', () => {
+                breedOverlay.style.display = 'flex';
+                if(breedSearchInputInner) breedSearchInputInner.focus();
+            });
+
+            // Close Modal bindings
+            const closeModal = () => {
+                breedOverlay.style.display = 'none';
+                if(breedSearchInputInner) breedSearchInputInner.value = '';
+                if(customBreedInput) customBreedInput.value = '';
+                
+                // Reset filter layout on close
+                if(breedOptionsContainer) {
+                    Array.from(breedOptionsContainer.children).forEach(card => card.style.display = 'flex');
+                }
+            };
+
+            if(closeBreedModal) closeBreedModal.addEventListener('click', closeModal);
+            breedOverlay.addEventListener('click', (e) => {
+                if (e.target === breedOverlay) closeModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && breedOverlay.style.display === 'flex') closeModal();
+            });
+
+            // Live Search Filter
+            if(breedSearchInputInner) {
+                breedSearchInputInner.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    Array.from(breedOptionsContainer.children).forEach(card => {
+                        const breedName = card.querySelector('.card-label').textContent.toLowerCase();
+                        card.style.display = breedName.includes(term) ? 'flex' : 'none';
+                    });
+                });
+            }
+
+            // Handle Custom Entry
+            if(useCustomBreedBtn) {
+                useCustomBreedBtn.addEventListener('click', () => {
+                    const customVal = customBreedInput.value.trim();
+                    if (customVal) {
+                        breedInput.value = customVal;
+                        closeModal();
+                        validateForm();
+                    }
+                });
+            }
+
+            // Helper to render grid
+            window.renderBreedGrid = (breedsDataArr) => {
+                breedOptionsContainer.innerHTML = '';
+                breedsDataArr.forEach(breed => {
+                    const card = document.createElement('div');
+                    card.className = 'breed-option-card';
+                    card.innerHTML = `
+                        <span class="card-label">${breed}</span>
+                        <span class="check-icon">✓</span>
+                    `;
+                    card.addEventListener('click', () => {
+                        breedInput.value = breed;
+                        closeModal();
+                        validateForm();
+                    });
+                    breedOptionsContainer.appendChild(card);
+                });
+            };
+        }
 
         document.querySelectorAll('.species-card').forEach(card => {
             card.addEventListener('click', function () {
@@ -126,8 +201,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.selectedSpecies = this.dataset.value;
                 if (speciesInput) speciesInput.value = window.selectedSpecies;
                 
-                // --- ONBOARDING BREED DYNAMIC LOGIC (DATALIST) ---
-                if (breedInput && breedDatalist) {
+                // --- ONBOARDING BREED DYNAMIC LOGIC (MODAL) ---
+                if (breedInput && breedOptionsContainer) {
                     const breedsData = {
                         Dog: ["Affenpinscher", "Afghan Hound", "Airedale Terrier", "Akita", "Alaskan Malamute", "American Bulldog", "American Pit Bull Terrier", "American Staffordshire Terrier", "Anatolian Shepherd", "Australian Cattle Dog", "Australian Shepherd", "Basset Hound", "Beagle", "Belgian Malinois", "Bernese Mountain Dog", "Bichon Frise", "Bloodhound", "Border Collie", "Border Terrier", "Boston Terrier", "Boxer", "Boykin Spaniel", "Brittany", "Brussels Griffon", "Bull Terrier", "Bulldog", "Bullmastiff", "Cairn Terrier", "Cane Corso", "Cardigan Welsh Corgi", "Cavalier King Charles Spaniel", "Chesapeake Bay Retriever", "Chihuahua", "Chinese Crested", "Chinese Shar-Pei", "Chow Chow", "Collie", "Coonhound", "Corgi", "Cotons de Tulear", "Dachshund", "Dalmatian", "Doberman Pinscher", "Dogo Argentino", "English Cocker Spaniel", "English Mastiff", "English Setter", "English Springer Spaniel", "English Toy Spaniel", "French Bulldog", "German Shepherd", "German Shorthaired Pointer", "German Wirehaired Pointer", "Giant Schnauzer", "Golden Retriever", "Gordon Setter", "Great Dane", "Great Pyrenees", "Greyhound", "Havanese", "Irish Setter", "Irish Wolfhound", "Italian Greyhound", "Jack Russell Terrier", "Japanese Chin", "Keeshond", "Kerry Blue Terrier", "Labradoodle", "Labrador Retriever", "Lhasa Apso", "Maltese", "Mastiff", "Miniature Pinscher", "Miniature Schnauzer", "Newfoundland", "Norfolk Terrier", "Norwegian Elkhound", "Papillon", "Pekingese", "Pembroke Welsh Corgi", "Pit Bull", "Pomeranian", "Poodle", "Portuguese Water Dog", "Pug", "Rhodesian Ridgeback", "Rottweiler", "Saint Bernard", "Saluki", "Samoyed", "Schipperke", "Scottish Deerhound", "Scottish Terrier", "Shetland Sheepdog", "Shiba Inu", "Shih Tzu", "Siberian Husky", "Staffordshire Bull Terrier", "Standard Schnauzer", "Tibetan Mastiff", "Tibetan Terrier", "Vizsla", "Weimaraner", "Welsh Terrier", "West Highland White Terrier", "Whippet", "Yorkshire Terrier", "Mixed / Mutt"],
                         Cat: ["Abyssinian", "American Bobtail", "American Curl", "American Shorthair", "American Wirehair", "Balinese", "Bengal", "Birman", "Bombay", "British Shorthair", "Burmese", "Burmilla", "Chartreux", "Colorpoint Shorthair", "Cornish Rex", "Devon Rex", "Domestic Longhair", "Domestic Mediumhair", "Domestic Shorthair", "Egyptian Mau", "European Shorthair", "Exotic Shorthair", "Havana Brown", "Himalayan", "Japanese Bobtail", "Khao Manee", "Korat", "LaPerm", "Maine Coon", "Manx", "Munchkin", "Nebelung", "Norwegian Forest Cat", "Ocicat", "Oriental", "Persian", "Peterbald", "Pixie-bob", "Ragamuffin", "Ragdoll", "Russian Blue", "Savannah", "Scottish Fold", "Selkirk Rex", "Siamese", "Siberian", "Singapura", "Snowshoe", "Somali", "Sphynx", "Tonkinese", "Turkish Angora", "Turkish Van", "Mixed"],
@@ -135,14 +210,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         Other: []
                     };
                     const availableBreeds = breedsData[window.selectedSpecies] || [];
-                    breedInput.value = ''; // Reset on change
-                    breedDatalist.innerHTML = ''; // Clear old list
-                    
-                    availableBreeds.forEach(breed => {
-                        const option = document.createElement('option');
-                        option.value = breed;
-                        breedDatalist.appendChild(option);
-                    });
+                    breedInput.value = ''; // Reset UI choice
+                    window.renderBreedGrid(availableBreeds);
                 }
                 
                 validateForm();
