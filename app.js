@@ -382,8 +382,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 
                 document.getElementById('logout-paywall-btn').addEventListener('click', async () => {
+                    localStorage.clear();
+                    sessionStorage.clear();
                     await window.supabaseClient.auth.signOut();
-                    window.location.href = 'index.html';
+                    window.location.replace('/index.html');
                 });
                 return; // CRITICAL: Halts further execution (no dashboard/onboarding loading)
             }
@@ -394,16 +396,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: petData } = await window.supabaseClient.from('pets').select('*').eq('owner_id', user.id);
             allPets = petData || [];
 
-            // 4. ROUTER: Force onboarding if no pets
+            // 4. ROUTER: Guard Onboarding and Break Infinite Loop
             const isOnboarding = window.location.pathname.includes('onboarding');
             const isPaywall = window.location.pathname.includes('paywall');
             const isAddingNew = urlParams.get('new') === 'true';
 
-            if (allPets.length === 0 && !isOnboarding && !isPaywall) {
-                window.location.href = '/onboarding';
+            if (isOnboarding) {
+                // 1. Fetch fresh pet count purely from Database (Ignore Stale Memory)
+                const { data: dbPets } = await window.supabaseClient.from('pets').select('id').eq('owner_id', user.id);
+                
+                // 2. Break the Loop
+                if (dbPets && dbPets.length > 0 && !isAddingNew) {
+                    window.location.replace('/dashboard');
+                    return; // Halt execution and escape loop
+                } else {
+                    return; // Render Onboarding UI and do NOT fall through
+                }
+            }
+
+            if (allPets.length === 0 && !isPaywall) {
+                window.location.replace('/onboarding');
                 return;
             } else if (allPets.length > 0 && isOnboarding && !isAddingNew) {
-                window.location.href = '/dashboard';
+                window.location.replace('/dashboard');
                 return;
             }
             if (allPets.length === 0) return; // Safety halt
@@ -909,7 +924,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) logoutBtn.addEventListener('click', async () => { await window.supabaseClient.auth.signOut(); localStorage.clear(); window.location.href = 'index.html'; });
+        if (logoutBtn) logoutBtn.addEventListener('click', async () => { 
+            localStorage.clear(); 
+            sessionStorage.clear();
+            await window.supabaseClient.auth.signOut(); 
+            window.location.replace('/index.html'); 
+        });
 
         document.querySelectorAll('.dashboard-card').forEach((card, index) => {
             card.style.opacity = 0; card.style.animation = `fadeInUp 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards ${index * 0.1}s`;

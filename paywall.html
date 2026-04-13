@@ -490,8 +490,10 @@
 
             // Logout Handler
             logoutBtn.addEventListener('click', async () => {
+                localStorage.clear();
+                sessionStorage.clear();
                 await window.supabaseClient.auth.signOut();
-                window.location.href = '/index.html';
+                window.location.replace('/index.html');
             });
         });
     </script>
