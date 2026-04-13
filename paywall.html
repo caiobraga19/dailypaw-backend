@@ -450,15 +450,42 @@
             }
 
             // Checkout Handler
-            checkoutBtn.addEventListener('click', () => {
-                if (!sessionUserId) return;
-                
-                checkoutBtn.disabled = true;
-                checkoutBtn.innerHTML = '<div class="loader"></div> <span>Processing...</span>';
-                
-                // Redirect directly to Stripe Payment Link with the user ID for webhook tracking
-                const STRIPE_LINK = 'https://buy.stripe.com/test_14A3cucDceUU8UE2Hm5c400';
-                window.location.href = `${STRIPE_LINK}?client_reference_id=${sessionUserId}`;
+            checkoutBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                this.innerHTML = '<div class="loader"></div> <span>Gerando Checkout Seguro...</span>';
+                this.style.opacity = "0.7";
+                this.disabled = true;
+
+                try {
+                    // 1. Get current logged-in user
+                    const { data: { session } } = await window.supabaseClient.auth.getSession();
+                    const userId = session?.user?.id;
+
+                    if (!userId) throw new Error("Usuário não autenticado.");
+
+                    // 2. Call backend to generate intelligent Stripe session
+                    const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin;
+                    
+                    const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: userId })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // 3. Redirect dynamically
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error("Falha ao gerar link.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    this.innerHTML = '<span>Erro. Tente novamente.</span>';
+                    this.style.opacity = "1";
+                    this.disabled = false;
+                }
             });
 
             // Logout Handler
