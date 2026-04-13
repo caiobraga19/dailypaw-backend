@@ -102,7 +102,7 @@ app.use(express.static(__dirname));
 // --- ROTA PARA CRIAR O PAGAMENTO (CHECKOUT) ---
 app.post("/api/create-checkout-session", async (req, res) => {
     const { userId } = req.body;
-    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'https://dailypaw.vercel.app';
 
     try {
         const session = await stripe.checkout.sessions.create({
@@ -118,8 +118,9 @@ app.post("/api/create-checkout-session", async (req, res) => {
         });
 
         res.json({ url: session.url });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+    } catch (err) {
+        console.error("Stripe Checkout Error:", err.message);
+        res.status(500).json({ error: "Erro interno: " + err.message });
     }
 });
 
