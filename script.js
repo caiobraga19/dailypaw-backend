@@ -381,12 +381,17 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
             .single();
 
         if (profile?.is_premium) {
-            window.location.href = '/dashboard';
+            // Do not force redirect if the user is in the middle of the paywall flow
+            if (!window.location.pathname.includes('paywall')) {
+                window.location.href = '/dashboard';
+            }
         } else {
-            window.location.href = '/paywall';
+            window.location.href = '/paywall.html';
         }
     } catch (e) {
         console.error('[AUTH] Profile check failed, defaulting to dashboard:', e);
-        window.location.href = '/dashboard';
+        if (!window.location.pathname.includes('paywall')) {
+            window.location.href = '/dashboard';
+        }
     }
 });

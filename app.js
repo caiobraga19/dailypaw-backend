@@ -396,9 +396,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 4. ROUTER: Force onboarding if no pets
             const isOnboarding = window.location.pathname.includes('onboarding');
+            const isPaywall = window.location.pathname.includes('paywall');
             const isAddingNew = urlParams.get('new') === 'true';
 
-            if (allPets.length === 0 && !isOnboarding) {
+            if (allPets.length === 0 && !isOnboarding && !isPaywall) {
                 window.location.href = '/onboarding';
                 return;
             } else if (allPets.length > 0 && isOnboarding && !isAddingNew) {
