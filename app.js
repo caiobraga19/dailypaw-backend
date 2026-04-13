@@ -765,7 +765,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const data = await response.json();
                         const reportContainer = document.getElementById('weekly-report-content');
                         if (reportContainer) {
-                            const formattedHtml = data.summary.split('\\n\\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\\n/g, '<br>')}</p>`).join('');
+                            // Normalize newlines (in case of double escaped strings) and split into paragraphs
+                            const normalizedText = data.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n'); 
+                            const formattedHtml = normalizedText.split('\n\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\n/g, '<br>')}</p>`).join('');
                             reportContainer.innerHTML = `<div class="ai-report-formatted">${formattedHtml}</div>`;
                         }
                         // Save so it loads automatically next time

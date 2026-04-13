@@ -209,18 +209,31 @@ app.post("/api/generate-weekly-report", async (req, res) => {
             return res.status(403).json({ error: limitCheck.error });
         }
 
-        const prompt = `Atue como um Patologista Clínico Veterinário Certificado. Você deve gerar o Relatório Semanal de Saúde com Inteligência Artificial para o paciente ${petContext.name}.
-Dados do Paciente: ${JSON.stringify(petContext)}
-Monitoramento Diário (Últimos 7 dias): ${JSON.stringify(logs)}
-Análise Fotográfica de Alimentos (Nutrição Recente): ${JSON.stringify(scans)}
-Contexto Recente do Chat Veterinário: ${JSON.stringify(chatHistory)}
+        const prompt = `[SISTEMA: MODO CLÍNICO ESTRITO ATIVADO]
+Você é um Médico Veterinário Especialista em Patologia Clínica e Medicina Preventiva, redigindo um 'Laudo Clínico Semanal Automático' para o prontuário.
 
-REQUISITOS ESTRITOS (STRICT REQUIREMENTS):
-1. IDIOMA E TOM: Escreva EXATAMENTE e SOMENTE em Português (PT-BR). O tom deve ser excepcionalmente profissional, autoritativo e estritamente clínico. Não use gírias ou emojis (ex: NUNCA diga "Ei Rex, parece que...").
-2. FORMATO OBRIGATÓRIO: Escreva exata e claramente em 3 (três) parágrafos detalhados. Você DEVE separar cada parágrafo com uma dupla quebra de linha ("\\n\\n") para garantir o espaçamento correto no sistema. Seja detalhista, gerando um texto razoavelmente longo (mínimo de 180 palavras).
-3. PARÁGRAFO 1 (Sinais Vitais e Comportamento Clínico): Faça uma análise minuciosa das tendências de energia, apetite e humor usando vocabulário médico-veterinário avançado (ex. estado letárgico, inapetência transitória, estabilidade comportamental).
-4. PARÁGRAFO 2 (Nutrição e Sistema Gastrointestinal): Analise profundamente os dados nutricionais fornecidos no 'Food Scanner Data'. Correlacione o alimento ingerido com os macro-nutrientes ideais para a raça (${petContext.breed}), idade (${petContext.age}) e peso (${petContext.weight} kg).
-5. PARÁGRAFO 3 (Síntese Proativa e Recomendações): Forneça diretrizes profiláticas avançadas, indicando fatores de risco potenciais e síntese do estado geral baseada nos registros do chat e logs. Crie valor demonstrando a inteligência analítica do DailyPaw AI+.`;
+DADOS CLÍNICOS DO PACIENTE:
+- Nome/Identificação: ${petContext.name}
+- Espécie/Raça: ${petContext.species} / ${petContext.breed}
+- Idade: ${petContext.age}
+- Peso: ${petContext.weight} kg
+- Nível de Atividade Base: ${petContext.activity || 'Não informado'}
+
+REGISTROS DE MONITORAMENTO (Últimos 7 dias): ${JSON.stringify(logs)}
+ANÁLISE NUTRICIONAL (Food Scans): ${JSON.stringify(scans)}
+HISTÓRICO DO CHAT DE TRIAGEM: ${JSON.stringify(chatHistory)}
+
+=== DIRETRIZES ABSOLUTAS DE GERAÇÃO ===
+1. OBRIGATÓRIO: O texto deve ser extenso, detalhado e técnico (mínimo de 250 palavras).
+2. OBRIGATÓRIO: O tom deve ser IMPESSOAL, OBJETIVO, TÉCNICO e CIENTÍFICO. 
+   - PROIBIDO o uso de pronomes na primeira/segunda pessoa para o pet (você, seu).
+   - PROIBIDO saudações informais ou conversas diretas com o animal (ex: NUNCA escreva "Ei Rex", "Parece que você...").
+   - PROIBIDO uso de exclamações emocionais ou emojis.
+   - Refira-se ao animal estritamente como "o paciente", "o animal", ou "o espécime ${petContext.name}".
+3. ESTRUTURA DO LAUDO (Exatamente 3 parágrafos densos, separados por dupla quebra de linha "\\n\\n"):
+   [Parágrafo 1 - Evolução Clínica e Sinais Vitais] Avalie os logs e o chat. Use jargão médico como "normorexia", "hiporexia", "letargia", "eutimia", "estabilidade comportamental". Sintetize a curva de energia e humor da semana de forma pericial e cronológica.
+   [Parágrafo 2 - Parecer Nutricional e Metabólico] Examine os scans. Emita um parecer nutrológico técnico relacionando o alimento ingerido ao porte (${petContext.weight} kg), idade e raça (${petContext.breed}). Detalhe a adequação de macronutrientes, balanço energético e potenciais riscos ao trato gastrointestinal.
+   [Parágrafo 3 - Plano Profilático e Prognóstico] Conclua com diretrizes médicas preditivas. Aponte fatores de risco morfofisiológicos cruzados com os achados da semana. Prescreva recomendações preventivas severas de forma autoritária.`;
 
         const result = await Promise.race([
             analyzeProactiveHealth(prompt),
