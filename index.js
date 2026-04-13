@@ -113,7 +113,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 quantity: 1,
             }],
             mode: 'subscription',
-            success_url: `${FRONTEND_URL}/onboarding?upgrade=success`,
+            success_url: `${FRONTEND_URL}/onboarding.html?upgrade=success`,
             cancel_url: `${FRONTEND_URL}/dashboard`,
         });
 
