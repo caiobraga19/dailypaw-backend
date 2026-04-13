@@ -117,15 +117,79 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ageInput) ageInput.addEventListener('input', validateForm);
         if (weightInput) weightInput.addEventListener('input', validateForm);
 
+        const breedDropdown = document.getElementById('breed-dropdown');
+
+        if (breedInput && breedDropdown) {
+            // Dropdown Focus & Filter logic
+            breedInput.addEventListener('focus', () => {
+                if (breedDropdown.children.length > 0) breedDropdown.style.display = 'block';
+            });
+            
+            breedInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                let hasVisible = false;
+                Array.from(breedDropdown.children).forEach(item => {
+                    if (item.textContent.toLowerCase().includes(term)) {
+                        item.style.display = 'block';
+                        hasVisible = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                breedDropdown.style.display = hasVisible ? 'block' : 'none';
+                validateForm();
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== breedInput && !breedDropdown.contains(e.target)) {
+                    breedDropdown.style.display = 'none';
+                }
+            });
+        }
+
         document.querySelectorAll('.species-card').forEach(card => {
             card.addEventListener('click', function () {
                 document.querySelectorAll('.species-card').forEach(c => c.classList.remove('active', 'selected'));
                 this.classList.add('active', 'selected');
                 window.selectedSpecies = this.dataset.value;
                 if (speciesInput) speciesInput.value = window.selectedSpecies;
+                
+                // --- ONBOARDING BREED DYNAMIC LOGIC ---
+                if (breedInput && breedDropdown) {
+                    const breedsData = {
+                        Dog: ['Pitbull', 'Labrador', 'Golden Retriever', 'Poodle', 'Bulldog', 'German Shepherd', 'Mixed', 'Other'],
+                        Cat: ['Persian', 'Siamese', 'Maine Coon', 'Sphynx', 'Bengal', 'Mixed', 'Other'],
+                        Bird: ['Parrot', 'Canary', 'Cockatiel', 'Other'],
+                        Other: ['Other']
+                    };
+                    const availableBreeds = breedsData[window.selectedSpecies] || ['Other'];
+                    breedInput.value = ''; // Reset on change
+                    breedDropdown.innerHTML = ''; // Clear old list
+                    
+                    availableBreeds.forEach(breed => {
+                        const div = document.createElement('div');
+                        div.className = 'breed-dropdown-item';
+                        div.textContent = breed;
+                        div.addEventListener('click', () => {
+                            breedInput.value = breed;
+                            breedDropdown.style.display = 'none';
+                            validateForm();
+                        });
+                        breedDropdown.appendChild(div);
+                    });
+                }
+                
                 validateForm();
             });
         });
+
+        // Trigger default species selection to pre-populate breeds on load
+        const defaultSpecies = document.querySelector('.species-card.selected');
+        if (defaultSpecies) {
+            defaultSpecies.click();
+            if(breedInput) breedInput.value = ''; // Prevent auto-filling value if empty
+        }
 
         document.querySelectorAll('.activity-card').forEach(card => {
             card.addEventListener('click', function () {
