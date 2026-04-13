@@ -199,6 +199,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     user = session.user;
 
+    // --- STRIPE INSTANT VIP (runs on ANY authenticated page: onboarding OR dashboard) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgrade') === 'success') {
+        console.log('[STRIPE] upgrade=success detected. Syncing premium status...');
+        await window.supabaseClient.from('profiles').update({ is_premium: true }).eq('id', user.id);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('[STRIPE] ✅ Premium status synced successfully.');
+    }
+
     // --- GLOBALLY SCOPED UI FUNCTIONS ---
     function hydratePetSwitcher() {
         const itemsContainer = document.getElementById('switcher-items');
@@ -287,14 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- CORE INITIALIZATION (FAST LOAD) ---
     async function initUserData() {
         try {
-            // 1. STRIPE INSTANT VIP 
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('upgrade') === 'success') {
-                await window.supabaseClient.from('profiles').update({ is_premium: true }).eq('id', user.id);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            // 2. FETCH PROFILE
+            // 1. FETCH PROFILE
             const { data: profileData } = await window.supabaseClient.from('profiles').select('*').eq('id', user.id).single();
             userProfile = profileData || { is_premium: false };
 

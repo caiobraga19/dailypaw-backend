@@ -71,6 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Dynamic Checkout & Plan State ---
 let selectedPlan = 'premium'; // Premium-only SaaS
 
+// --- Auth Redirect Guard ---
+// Prevents the onAuthStateChange listener from double-redirecting when
+// the login form handler has already initiated a redirect.
+let _authRedirectInProgress = false;
+
 // --- Authentication Modal Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     const authModal = document.getElementById('auth-modal');
@@ -239,11 +244,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (error) throw error;
 
+                // Set guard BEFORE any redirect to block onAuthStateChange from competing
+                _authRedirectInProgress = true;
+
                 console.log("[AUTH] Acesso Garantido! Redirecionando...");
-                btn.style.backgroundColor = "#10B981"; // Pinta de Verde
+                btn.style.backgroundColor = "#10B981";
                 btn.style.color = "#ffffff";
                 btn.textContent = 'Success!';
-                setTimeout(() => window.location.href = 'dashboard.html', 500);
+
+                // Redirect immediately — no setTimeout race condition
+                window.location.href = '/dashboard';
 
             } else {
                 console.log("[AUTH] Chamando servidor de Cadastro...");
@@ -325,40 +335,58 @@ window.handlePostSignupUpgrade = () => {
 };
 
 // --- Global Auth Listener (Cross-Tab Sync & OAuth) ---
+// This listener handles:
+//   1. Cross-tab login sync (e.g., user confirms email in another tab)
+//   2. OAuth callback redirects (Google Sign-In)
+// It must NOT interfere with the manual login/signup form handlers above.
 window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log(`[AUTH] Evento detectado: ${event}`);
 
-    // If a session is detected (especially via cross-tab sync or email confirmation)
-    if (session) {
-        // Narrow the scope to guest pages (landing/signup) to prevent unnecessary redirects on dashboard/onboarding
-        const isGuestPage = window.location.pathname.endsWith('index.html') || 
-                           window.location.pathname === '/' || 
-                           window.location.pathname.includes('/signup');
+    // GUARD: If the login form handler already initiated a redirect, do nothing.
+    // This prevents the double-redirect race condition that caused infinite refreshes.
+    if (_authRedirectInProgress) {
+        console.log('[AUTH] Redirect already in progress (login form). Skipping listener.');
+        return;
+    }
 
-        if (isGuestPage) {
-            // SIGNED_IN is the primary event for cross-tab sync after email verification
-            if (event === 'SIGNED_IN') {
-                console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou Login).");
-                
-                // Handle OAuth token cleanup if present
-                if (window.location.hash.includes('access_token')) {
-                    window.history.replaceState(null, null, ' ');
-                }
+    // Only act on SIGNED_IN from external sources (OAuth, cross-tab, email verification).
+    // Ignore INITIAL_SESSION (fires on every page load if a session cookie exists)
+    // and TOKEN_REFRESHED (routine background token maintenance).
+    if (event !== 'SIGNED_IN') {
+        return;
+    }
 
-                try {
-                    // Check if user is premium
-                    const { data: profile } = await window.supabaseClient.from('profiles').select('is_premium').eq('id', session.user.id).single();
-                    
-                    if (profile?.is_premium) {
-                        window.location.href = '/dashboard';
-                    } else {
-                        // Redirect directly to the standalone paywall screen
-                        window.location.href = '/paywall.html';
-                    }
-                } catch (e) {
-                    window.location.href = '/dashboard';
-                }
-            }
+    // Only redirect from guest pages (landing, signup). Never from dashboard/onboarding.
+    const path = window.location.pathname;
+    const isGuestPage = path.endsWith('index.html') || path === '/' || path.includes('/signup');
+    if (!isGuestPage) {
+        return;
+    }
+
+    if (!session) return;
+
+    console.log("[AUTH] Sessão detectada (Cross-Tab Sync ou OAuth).");
+    _authRedirectInProgress = true; // Prevent any further listener triggers
+
+    // Handle OAuth token fragment cleanup
+    if (window.location.hash.includes('access_token')) {
+        window.history.replaceState(null, null, ' ');
+    }
+
+    try {
+        const { data: profile } = await window.supabaseClient
+            .from('profiles')
+            .select('is_premium')
+            .eq('id', session.user.id)
+            .single();
+
+        if (profile?.is_premium) {
+            window.location.href = '/dashboard';
+        } else {
+            window.location.href = '/paywall';
         }
+    } catch (e) {
+        console.error('[AUTH] Profile check failed, defaulting to dashboard:', e);
+        window.location.href = '/dashboard';
     }
 });
