@@ -353,10 +353,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
                 
-                document.getElementById('global-checkout-btn').addEventListener('click', function() {
-                    this.textContent = "Iniciando Checkout Seguro...";
+                document.getElementById('global-checkout-btn').addEventListener('click', async function() {
+                    this.textContent = "Gerando Checkout Seguro...";
                     this.style.opacity = "0.7";
-                    window.location.href = `https://buy.stripe.com/test_14A3cucDceUU8UE2Hm5c400?client_reference_id=${user.id}`;
+                    this.disabled = true;
+                    try {
+                        const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: user.id })
+                        });
+                        const data = await response.json();
+                        if (data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            throw new Error("Falha ao gerar link.");
+                        }
+                    } catch (err) {
+                        this.textContent = "Erro. Tente novamente.";
+                        this.style.opacity = "1";
+                        this.disabled = false;
+                    }
                 });
                 
                 document.getElementById('logout-paywall-btn').addEventListener('click', async () => {

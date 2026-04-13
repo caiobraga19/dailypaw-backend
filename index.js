@@ -113,11 +113,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 quantity: 1,
             }],
             mode: 'subscription',
-            success_url: `${FRONTEND_URL}/onboarding.html?upgrade=success`,
+            success_url: `${FRONTEND_URL}/onboarding?upgrade=success`,
             cancel_url: `${FRONTEND_URL}/dashboard`,
         });
 
-        res.json({ id: session.id });
+        res.json({ url: session.url });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
