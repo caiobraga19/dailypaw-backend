@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="styles.css">
 
     <!-- Supabase Setup -->
@@ -19,7 +19,8 @@
     <style>
         /* Specific Distraction-Free Overrides for Paywall */
         body {
-            background-color: #FAF8F5; /* Standard DailyPaw background */
+            background-color: #FAF8F5;
+            /* Standard DailyPaw background */
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
@@ -145,9 +146,17 @@
         }
 
         @keyframes float-card {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
 
         .paywall-card-badge {
@@ -169,7 +178,7 @@
         .paywall-card-header {
             text-align: center;
             margin-bottom: 32px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding-bottom: 32px;
         }
 
@@ -250,17 +259,20 @@
         }
 
         .loader {
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 3px solid #fff;
             width: 20px;
             height: 20px;
             animation: spin 1s linear infinite;
         }
-        
+
         .loading-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: #FAF8F5;
             display: flex;
             flex-direction: column;
@@ -270,7 +282,15 @@
             transition: opacity 0.5s ease;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Responsive Layout */
         @media (max-width: 968px) {
@@ -279,16 +299,20 @@
                 gap: 40px;
                 padding: 30px 20px;
             }
+
             .paywall-value-prop {
                 padding-right: 0;
                 text-align: center;
             }
+
             .paywall-brand {
                 justify-content: center;
             }
+
             .paywall-benefits li {
                 text-align: left;
             }
+
             .paywall-title {
                 font-size: 2.5rem;
             }
@@ -300,7 +324,9 @@
 
     <!-- Initial Loading State -->
     <div class="loading-screen" id="auth-check-loader">
-        <div class="loader" style="border-color: rgba(58, 90, 64, 0.2); border-top-color: #3A5A40; width: 40px; height: 40px; margin-bottom: 20px;"></div>
+        <div class="loader"
+            style="border-color: rgba(58, 90, 64, 0.2); border-top-color: #3A5A40; width: 40px; height: 40px; margin-bottom: 20px;">
+        </div>
         <p style="color: #6B7B75; font-weight: 500;">Securing connection...</p>
     </div>
 
@@ -312,7 +338,8 @@
             </div>
             <h1 class="paywall-title">Your pet's health, <span>perfected by AI.</span></h1>
             <p class="paywall-subtitle">
-                Email successfully verified! DailyPaw operates on an exclusive, premium-only model to provide unparalleled continuous veterinary intelligence without limits.
+                Email successfully verified! DailyPaw operates on an exclusive, premium-only model to provide
+                unparalleled continuous veterinary intelligence without limits.
             </p>
 
             <ul class="paywall-benefits">
@@ -327,21 +354,24 @@
                     <div class="icon">✓</div>
                     <div>
                         Advanced Food Scanning
-                        <span class="paywall-benefits-desc">Analyze meals, toxicities, and nutritional profiles instantly via camera.</span>
+                        <span class="paywall-benefits-desc">Analyze meals, toxicities, and nutritional profiles
+                            instantly via camera.</span>
                     </div>
                 </li>
                 <li>
                     <div class="icon">✓</div>
                     <div>
                         Weekly Professional Reports
-                        <span class="paywall-benefits-desc">Comprehensive AI-generated health synthesis based on your daily logs.</span>
+                        <span class="paywall-benefits-desc">Comprehensive AI-generated health synthesis based on your
+                            daily logs.</span>
                     </div>
                 </li>
                 <li>
                     <div class="icon">✓</div>
                     <div>
                         Smart Clinical Guard
-                        <span class="paywall-benefits-desc">Proactive anomaly detection for lethargy, appetite loss, and other critical patterns.</span>
+                        <span class="paywall-benefits-desc">Proactive anomaly detection for lethargy, appetite loss, and
+                            other critical patterns.</span>
                     </div>
                 </li>
             </ul>
@@ -351,7 +381,7 @@
         <div class="paywall-card-container">
             <div class="paywall-card">
                 <div class="paywall-card-badge">All-Inclusive Edition</div>
-                
+
                 <div class="paywall-card-header">
                     <div class="paywall-card-title">DailyPaw AI+</div>
                     <div class="paywall-price-wrap">
@@ -364,17 +394,19 @@
                 <button id="trigger-checkout" class="paywall-checkout-btn">
                     <span>Activate Subscription</span>
                 </button>
-                
+
                 <div class="paywall-secure-note">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                     <span>Secure payment powered by Stripe</span>
                 </div>
-                
+
                 <div style="text-align: center; margin-top: 24px;">
-                    <button id="logout-btn" style="background: none; border: none; font-size: 0.85rem; color: #A3B1AA; cursor: pointer; text-decoration: underline;">
+                    <button id="logout-btn"
+                        style="background: none; border: none; font-size: 0.85rem; color: #A3B1AA; cursor: pointer; text-decoration: underline;">
                         Use a different account
                     </button>
                 </div>
@@ -394,11 +426,11 @@
 
             // 1. Await Session (handles email verification redirect token processing)
             const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-            
+
             if (error || !session) {
                 // Try listening for a few seconds if the token is processing
                 console.warn("No immediate session found. Listening for Auth changes...");
-                
+
                 const { data: { subscription } } = window.supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
                     if (event === 'SIGNED_IN' && newSession) {
                         subscription.unsubscribe();
@@ -419,7 +451,7 @@
 
             async function verifyPremiumAndShow(user) {
                 sessionUserId = user.id;
-                
+
                 // Clear any url hash lingering from Supabase magic link
                 if (window.location.hash.includes('access_token')) {
                     window.history.replaceState(null, null, window.location.pathname);
@@ -437,7 +469,7 @@
                         window.location.href = '/dashboard';
                         return;
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("Profile fetch error:", e);
                 }
 
@@ -450,7 +482,7 @@
             }
 
             // Checkout Handler
-            checkoutBtn.addEventListener('click', async function(e) {
+            checkoutBtn.addEventListener('click', async function (e) {
                 e.preventDefault();
                 this.innerHTML = '<div class="loader"></div> <span>Gerando Checkout Seguro...</span>';
                 this.style.opacity = "0.7";
@@ -465,15 +497,15 @@
 
                     // 2. Call backend to generate intelligent Stripe session
                     const API_BASE = 'https://dailypaw-api.onrender.com';
-                    
+
                     const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId: userId })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     // 3. Redirect dynamically
                     if (data.url) {
                         window.location.href = data.url;
@@ -498,4 +530,5 @@
         });
     </script>
 </body>
+
 </html>

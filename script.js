@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { data, error } = await window.supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { 
+                    options: {
                         data: { full_name: fullName },
                         emailRedirectTo: window.location.origin + '/paywall.html'
                     }
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (error) throw error;
 
                 console.log("[AUTH] Cadastro iniciado com sucesso! Aguardando confirmação...");
-                
+
                 // Save user ID to allow immediate Stripe checkout
                 if (data && data.user) {
                     window.pendingUserId = data.user.id;
@@ -281,9 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Exibe o estado de "Awaiting Verification"
                 const pendingEmailEl = document.getElementById('pending-email-display');
                 if (pendingEmailEl) pendingEmailEl.textContent = email;
-                
+
                 switchAuthMode('email-pending');
-                
+
                 // O botão de sucesso é apenas um feedback rápido antes de trocar a view
                 btn.style.backgroundColor = "#10B981";
                 btn.style.color = "#ffffff";
