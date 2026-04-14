@@ -214,7 +214,6 @@ app.post("/api/generate-weekly-report", async (req, res) => {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        // Fail-safe fetch block in case of empty tables or varying schema
         let recentLogs = [];
         let chatHistory = [];
         
@@ -238,26 +237,44 @@ app.post("/api/generate-weekly-report", async (req, res) => {
             chatHistory = chatData || [];
         } catch (err) { console.error("Warn: No chat_history table or error", err.message); }
 
-        // 2. DYNAMIC SYSTEM PROMPT
+        // 2. CHECK FOR COLD START
+        const isColdStart = recentLogs.length === 0 && chatHistory.length === 0;
+
+        // 3. DYNAMIC SYSTEM PROMPT (STRICT CONSTRAINTS)
         const systemPrompt = `You are an elite Veterinary AI. Your task is to generate a clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}.
 
 STRICT RULES (FAILURE IS NOT AN OPTION):
 1. ZERO HALLUCINATIONS: Base your report EXCLUSIVELY on the data provided below. Do not invent habits, routines, or clinical signs.
-2. THE "COLD START" RULE (CRITICAL): If the 'Recent Daily Logs' and 'Recent Chat History' are empty or represent less than 24 hours of data, your entire response must be a MAXIMUM of 2 to 3 concise sentences. Simply acknowledge that ${petContext.name}'s profile was just initialized and state that the AI is waiting for more daily logs and chat interactions to establish a clinical baseline. DO NOT perform a physiological analysis.
-3. NO MARKDOWN: You are strictly forbidden from using Markdown formatting. DO NOT use asterisks (**), bolding, hashtags (#), or bullet points. Output 100% plain, readable text with standard paragraph breaks.
+2. NO MARKDOWN: You are strictly forbidden from using Markdown formatting. DO NOT use asterisks (**), bolding, hashtags (#), or bullet points. Output 100% plain text with standard paragraph breaks.
 
 --- DATA INJECTION ---
 Recent Daily Logs: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs yet.')}
 Recent Chat History: ${JSON.stringify(chatHistory.length > 0 ? chatHistory : 'No chat history yet.')}
 `;
 
-        const result = await Promise.race([
-            analyzeProactiveHealth(systemPrompt),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
-        ]);
+        // 4. DIRECT LLM CALL (Replace analyzeProactiveHealth)
+        // We inject the Cold Start logic directly into the response if true, bypassing the LLM hallucination risk entirely.
+        let reportText = "";
+
+        if (isColdStart) {
+            reportText = `The profile for ${petContext.name} was recently created. The Clinical AI is currently monitoring physiological parameters and awaiting further daily logs and chat interactions to establish a comprehensive baseline report.`;
+        } else {
+             // If we have data, we ask the LLM to synthesize it cleanly without Markdown.
+             // We use a simplified fetch to Anthropic/OpenAI or whatever model you use natively.
+             // Since analyzeProactiveHealth is your main tool, we will force it, but override the prompt heavily.
+             const strictPrompt = `${systemPrompt}\n\nRemember: Generate a 1-paragraph summary. DO NOT USE MARKDOWN ASTERISKS.`;
+             const result = await Promise.race([
+                 analyzeProactiveHealth(strictPrompt),
+                 new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
+             ]);
+             reportText = result.insight || result.text || "Status: Logged. System sync in progress.";
+             
+             // Brutal regex to kill markdown asterisks if the LLM still disobeys
+             reportText = reportText.replace(/\*/g, ''); 
+        }
 
         res.json({
-            summary: result.insight || result.text || "Status: Logged. System sync in progress.",
+            summary: reportText,
             isPremiumTier: true
         });
     } catch (e) {
