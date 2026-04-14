@@ -206,77 +206,60 @@ app.post("/api/generate-weekly-report", async (req, res) => {
         const { userId, petContext } = req.body;
 
         const limitCheck = await enforcePremiumAccess(userId);
-        if (!limitCheck.allowed) {
-            return res.status(403).json({ error: limitCheck.error });
-        }
+        if (!limitCheck.allowed) return res.status(403).json({ error: limitCheck.error });
 
-        // 1. DATA RETRIEVAL (RAG)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         let recentLogs = [];
-        let chatHistory = [];
-        
+        let chatLogs = [];
+
         try {
             if (petContext.id) {
-                const { data: logsData } = await supabaseAdmin.from('daily_tracking')
+                const { data: logsData } = await supabaseAdmin.from('daily_logs')
                     .select('*')
                     .eq('pet_id', petContext.id)
                     .gte('created_at', sevenDaysAgo.toISOString())
                     .order('created_at', { ascending: false });
                 recentLogs = logsData || [];
             }
-        } catch (err) { console.error("Warn: No daily_tracking table or error", err.message); }
+        } catch (err) { }
 
         try {
-            const { data: chatData } = await supabaseAdmin.from('chat_history')
+            // CORREÇÃO: Lendo da tabela correta 'chat_logs'
+            const { data: chatData } = await supabaseAdmin.from('chat_logs')
                 .select('*')
-                .eq('user_id', userId)
+                .eq('pet_id', petContext.id)
                 .order('created_at', { ascending: false })
                 .limit(50);
-            chatHistory = chatData || [];
-        } catch (err) { console.error("Warn: No chat_history table or error", err.message); }
+            chatLogs = chatData || [];
+        } catch (err) { }
 
-        // 2. CHECK FOR COLD START
-        const isColdStart = recentLogs.length === 0 && chatHistory.length === 0;
-
-        // 3. DYNAMIC SYSTEM PROMPT (STRICT CONSTRAINTS)
-        const systemPrompt = `You are an elite Veterinary AI. Your task is to generate a clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}.
-
-STRICT RULES (FAILURE IS NOT AN OPTION):
-1. ZERO HALLUCINATIONS: Base your report EXCLUSIVELY on the data provided below. Do not invent habits, routines, or clinical signs.
-2. NO MARKDOWN: You are strictly forbidden from using Markdown formatting. DO NOT use asterisks (**), bolding, hashtags (#), or bullet points. Output 100% plain text with standard paragraph breaks.
-
---- DATA INJECTION ---
-Recent Daily Logs: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs yet.')}
-Recent Chat History: ${JSON.stringify(chatHistory.length > 0 ? chatHistory : 'No chat history yet.')}
-`;
-
-        // 4. DIRECT LLM CALL (Replace analyzeProactiveHealth)
-        // We inject the Cold Start logic directly into the response if true, bypassing the LLM hallucination risk entirely.
+        const isColdStart = recentLogs.length === 0 && chatLogs.length === 0;
         let reportText = "";
 
         if (isColdStart) {
             reportText = `The profile for ${petContext.name} was recently created. The Clinical AI is currently monitoring physiological parameters and awaiting further daily logs and chat interactions to establish a comprehensive baseline report.`;
         } else {
-             // If we have data, we ask the LLM to synthesize it cleanly without Markdown.
-             // We use a simplified fetch to Anthropic/OpenAI or whatever model you use natively.
-             // Since analyzeProactiveHealth is your main tool, we will force it, but override the prompt heavily.
-             const strictPrompt = `${systemPrompt}\n\nRemember: Generate a 1-paragraph summary. DO NOT USE MARKDOWN ASTERISKS.`;
-             const result = await Promise.race([
-                 analyzeProactiveHealth(strictPrompt),
-                 new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
-             ]);
-             reportText = result.insight || result.text || "Status: Logged. System sync in progress.";
-             
-             // Brutal regex to kill markdown asterisks if the LLM still disobeys
-             reportText = reportText.replace(/\*/g, ''); 
+            const systemPrompt = `You are an elite Veterinary AI. Generate a concise, 1-paragraph clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}. 
+STRICT RULES:
+1. ZERO HALLUCINATIONS: Base it ONLY on the data below.
+2. CRITICAL ALERT: If the chat history shows emergencies (e.g., dying, pain, blood), state this as a severe clinical warning.
+3. NO MARKDOWN: Output 100% plain text. No asterisks (**).
+
+--- DATA INJECTION ---
+Recent Daily Tracking: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs')}
+Recent Chat History: ${JSON.stringify(chatLogs.length > 0 ? chatLogs : 'No chats')}
+`;
+            const result = await Promise.race([
+                analyzeProactiveHealth(`${systemPrompt}\n\nDO NOT USE MARKDOWN ASTERISKS.`),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
+            ]);
+            reportText = result.insight || result.text || "Data processed.";
+            reportText = reportText.replace(/\*/g, '');
         }
 
-        res.json({
-            summary: reportText,
-            isPremiumTier: true
-        });
+        res.json({ summary: reportText, isPremiumTier: true });
     } catch (e) {
         console.error("Weekly Report Error:", e);
         res.json({ summary: "Status: Baseline evaluation recorded. Awaiting more data." });

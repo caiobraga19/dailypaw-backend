@@ -128,22 +128,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Open Modal
             breedInput.addEventListener('click', () => {
                 breedOverlay.style.display = 'flex';
-                if(breedSearchInputInner) breedSearchInputInner.focus();
+                if (breedSearchInputInner) breedSearchInputInner.focus();
             });
 
             // Close Modal bindings
             const closeModal = () => {
                 breedOverlay.style.display = 'none';
-                if(breedSearchInputInner) breedSearchInputInner.value = '';
-                if(customBreedInput) customBreedInput.value = '';
-                
+                if (breedSearchInputInner) breedSearchInputInner.value = '';
+                if (customBreedInput) customBreedInput.value = '';
+
                 // Reset filter layout on close
-                if(breedOptionsContainer) {
+                if (breedOptionsContainer) {
                     Array.from(breedOptionsContainer.children).forEach(card => card.style.display = 'flex');
                 }
             };
 
-            if(closeBreedModal) closeBreedModal.addEventListener('click', closeModal);
+            if (closeBreedModal) closeBreedModal.addEventListener('click', closeModal);
             breedOverlay.addEventListener('click', (e) => {
                 if (e.target === breedOverlay) closeModal();
             });
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             // Live Search Filter
-            if(breedSearchInputInner) {
+            if (breedSearchInputInner) {
                 breedSearchInputInner.addEventListener('input', (e) => {
                     const term = e.target.value.toLowerCase();
                     Array.from(breedOptionsContainer.children).forEach(card => {
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Handle Custom Entry
-            if(useCustomBreedBtn) {
+            if (useCustomBreedBtn) {
                 useCustomBreedBtn.addEventListener('click', () => {
                     const customVal = customBreedInput.value.trim();
                     if (customVal) {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 this.classList.add('active', 'selected');
                 window.selectedSpecies = this.dataset.value;
                 if (speciesInput) speciesInput.value = window.selectedSpecies;
-                
+
                 // --- ONBOARDING BREED DYNAMIC LOGIC (MODAL) ---
                 if (breedInput && breedOptionsContainer) {
                     const breedsData = {
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     breedInput.value = ''; // Reset UI choice
                     window.renderBreedGrid(availableBreeds);
                 }
-                
+
                 validateForm();
             });
         });
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const defaultSpecies = document.querySelector('.species-card.selected');
         if (defaultSpecies) {
             defaultSpecies.click();
-            if(breedInput) breedInput.value = ''; // Prevent auto-filling value if empty
+            if (breedInput) breedInput.value = ''; // Prevent auto-filling value if empty
         }
 
         document.querySelectorAll('.activity-card').forEach(card => {
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const user = session.user;
 
                 // 1. Guarantee the public Profile exists before attaching a pet
-                const { error: profileError } = await window.supabaseClient.from('profiles').upsert({ 
+                const { error: profileError } = await window.supabaseClient.from('profiles').upsert({
                     id: user.id,
                     email: user.email || ''
                 }, { onConflict: 'id' });
@@ -467,8 +467,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
                 `;
-                
-                document.getElementById('global-checkout-btn').addEventListener('click', async function() {
+
+                document.getElementById('global-checkout-btn').addEventListener('click', async function () {
                     this.textContent = "Gerando Checkout Seguro...";
                     this.style.opacity = "0.7";
                     this.disabled = true;
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         this.disabled = false;
                     }
                 });
-                
+
                 document.getElementById('logout-paywall-btn').addEventListener('click', async () => {
                     localStorage.clear();
                     sessionStorage.clear();
@@ -514,7 +514,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isOnboarding) {
                 // 1. Fetch fresh pet count purely from Database (Ignore Stale Memory)
                 const { data: dbPets } = await window.supabaseClient.from('pets').select('id').eq('owner_id', user.id);
-                
+
                 // 2. Break the Loop
                 if (dbPets && dbPets.length > 0 && !isAddingNew) {
                     window.location.replace('/dashboard');
@@ -587,34 +587,51 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Unified Brain: Harvest failed", err);
         }
     }
-
-    // --- DASHBOARD RENDERERS ---
     async function proactiveHealthGuard(dailyLogs, chatLogs, scans, pet) {
         if (!pet) return;
         const insightBadge = document.getElementById('insight-badge');
         const insightContainer = document.getElementById('insight-container');
         if (!insightBadge || !insightContainer) return;
 
-        const isPremium = userProfile?.is_premium;
-
         let level = 'stable', badgeText = 'Everything Normal', mainMessage = i18n.health_normal;
-        const recentLogs = dailyLogs || [];
-        const appetiteTrend = recentLogs.slice(0, 3).map(l => l.appetite);
-        const energyTrend = recentLogs.slice(0, 3).map(l => l.energy);
-        const isAnorexicTrend = appetiteTrend.length >= 2 && appetiteTrend.every(v => v === 'low');
-        const isLethargicTrend = energyTrend.length >= 2 && energyTrend.every(v => v === 'low');
 
-        if (isAnorexicTrend || isLethargicTrend) {
-            level = 'advisory'; badgeText = 'Observation Required'; mainMessage = `🔍 Alert: Trend shows ${isAnorexicTrend ? 'decreased appetite' : 'behavioral lethargy'} for over 48h.`;
-        } else if (scans && scans.some(s => s.safety_status === 'dangerous')) {
-            level = 'advisory'; badgeText = 'Nutritional Warning'; mainMessage = '🔍 Warning: Recently consumed food was flagged as potentially dangerous.';
+        const recentLogs = dailyLogs || [];
+        const recentChats = chatLogs || [];
+
+        // 1. CHECAGEM DE EMERGÊNCIA NO CHAT (Palavras Críticas)
+        // Vasculha as mensagens do usuário atrás de sinais de emergência
+        const isEmergencyChat = recentChats.some(msg =>
+            msg.role === 'user' &&
+            /morrendo|sangue|dor|vomit|socorro|emergency|dying|blood|pain|help|urgente/i.test(msg.message || msg.text || '')
+        );
+
+        // 2. CHECAGEM DO DAILY TRACKING IMEDIATA (Não espera 2 dias mais)
+        const hasRecentLow = recentLogs.length > 0 && (recentLogs[0].appetite === 'Low' || recentLogs[0].energy === 'Low' || recentLogs[0].appetite === 'low' || recentLogs[0].energy === 'low');
+
+        // LÓGICA DE DECISÃO
+        if (isEmergencyChat) {
+            level = 'critical';
+            badgeText = 'CRITICAL ALERT';
+            mainMessage = '⚠️ Urgent: Emergency terms detected in your recent chat. Immediate veterinary evaluation is strongly recommended.';
+            insightContainer.style.backgroundColor = '#FEF2F2'; // Fundo vermelho
+            insightContainer.style.borderLeft = '4px solid #EF4444';
+        } else if (scans && scans.some(s => s.safety_status === 'dangerous' || s.safety_status === 'TOXIC')) {
+            level = 'critical';
+            badgeText = 'TOXICITY ALERT';
+            mainMessage = '⚠️ Warning: Recently scanned food was flagged as highly dangerous or toxic.';
+            insightContainer.style.backgroundColor = '#FEF2F2';
+            insightContainer.style.borderLeft = '4px solid #EF4444';
+        } else if (hasRecentLow) {
+            level = 'advisory';
+            badgeText = 'Observation Required';
+            mainMessage = '🔍 Warning: Recent tracking indicates low energy or appetite today. Keep an eye on your pet.';
         }
 
-        const levelClass = level === 'advisory' ? 'warning' : 'success';
+        const levelClass = level === 'critical' ? 'danger' : (level === 'advisory' ? 'warning' : 'success');
         insightBadge.className = `status-pill ${levelClass}`;
         insightBadge.textContent = badgeText.toUpperCase();
         insightContainer.className = `insight-box ${level}`;
-        insightContainer.innerHTML = `<p>${mainMessage}</p>`;
+        insightContainer.innerHTML = `<p style="color: ${level === 'critical' ? '#B91C1C' : 'inherit'}; font-weight: ${level === 'critical' ? '600' : 'normal'};">${mainMessage}</p>`;
     }
 
     // --- RESTAURAÇÃO DO BANNER DO RELATÓRIO SEMANAL ---
@@ -628,9 +645,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const existingReport = reports && reports.length > 0 ? reports[0] : null;
 
             if (existingReport) {
-                const normalizedText = existingReport.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n'); 
+                const normalizedText = existingReport.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n');
                 const formattedHtml = normalizedText.split('\n\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\n/g, '<br>')}</p>`).join('');
-                
+
                 reportContainer.innerHTML = `
                     <div class="ai-report-formatted">${formattedHtml}</div>
                     <button id="regenerate-report-btn" class="btn-ai-premium" style="margin-top: 16px; background: none; border: 1px solid #d1d5db; color: #4b5563; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
@@ -900,7 +917,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const reportContainer = document.getElementById('weekly-report-content');
                         if (reportContainer) {
                             // Normalize newlines (in case of double escaped strings) and split into paragraphs
-                            const normalizedText = data.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n'); 
+                            const normalizedText = data.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n');
                             const formattedHtml = normalizedText.split('\n\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\n/g, '<br>')}</p>`).join('');
                             reportContainer.innerHTML = `<div class="ai-report-formatted">${formattedHtml}</div>`;
                         }
@@ -1042,11 +1059,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) logoutBtn.addEventListener('click', async () => { 
-            localStorage.clear(); 
+        if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+            localStorage.clear();
             sessionStorage.clear();
-            await window.supabaseClient.auth.signOut(); 
-            window.location.replace('/index.html'); 
+            await window.supabaseClient.auth.signOut();
+            window.location.replace('/index.html');
         });
 
         document.querySelectorAll('.dashboard-card').forEach((card, index) => {
