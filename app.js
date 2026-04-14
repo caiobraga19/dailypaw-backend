@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const user = session.user;
 
                 // 1. Guarantee the public Profile exists before attaching a pet
+                // CÓDIGO CORRIGIDO
                 const { error: profileError } = await window.supabaseClient.from('profiles').upsert({
-                    id: user.id,
-                    email: user.email || ''
+                    id: user.id
                 }, { onConflict: 'id' });
 
                 if (profileError) {
