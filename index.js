@@ -203,41 +203,56 @@ Instructions:
 
 app.post("/api/generate-weekly-report", async (req, res) => {
     try {
-        const { userId, petContext, logs, scans, chatHistory } = req.body;
+        const { userId, petContext } = req.body;
 
         const limitCheck = await enforcePremiumAccess(userId);
         if (!limitCheck.allowed) {
             return res.status(403).json({ error: limitCheck.error });
         }
 
-        const prompt = `[SISTEMA: MODO CLÍNICO ESTRITO ATIVADO]
-Você é um Médico Veterinário Especialista em Patologia Clínica e Medicina Preventiva, redigindo um 'Laudo Clínico Semanal Automático' para o prontuário.
+        // 1. DATA RETRIEVAL (RAG)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-DADOS CLÍNICOS DO PACIENTE:
-- Nome/Identificação: ${petContext.name}
-- Espécie/Raça: ${petContext.species} / ${petContext.breed}
-- Idade: ${petContext.age}
-- Peso: ${petContext.weight} kg
-- Nível de Atividade Base: ${petContext.activity || 'Não informado'}
+        // Fail-safe fetch block in case of empty tables or varying schema
+        let recentLogs = [];
+        let chatHistory = [];
+        
+        try {
+            if (petContext.id) {
+                const { data: logsData } = await supabaseAdmin.from('daily_tracking')
+                    .select('*')
+                    .eq('pet_id', petContext.id)
+                    .gte('created_at', sevenDaysAgo.toISOString())
+                    .order('created_at', { ascending: false });
+                recentLogs = logsData || [];
+            }
+        } catch (err) { console.error("Warn: No daily_tracking table or error", err.message); }
 
-REGISTROS DE MONITORAMENTO (Últimos 7 dias): ${JSON.stringify(logs)}
-ANÁLISE NUTRICIONAL (Food Scans): ${JSON.stringify(scans)}
-HISTÓRICO DO CHAT DE TRIAGEM: ${JSON.stringify(chatHistory)}
+        try {
+            const { data: chatData } = await supabaseAdmin.from('chat_history')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(50);
+            chatHistory = chatData || [];
+        } catch (err) { console.error("Warn: No chat_history table or error", err.message); }
 
-=== DIRETRIZES ABSOLUTAS DE GERAÇÃO ===
-1. OBRIGATÓRIO: O texto deve ser extenso, detalhado e técnico (mínimo de 250 palavras).
-2. OBRIGATÓRIO: O tom deve ser IMPESSOAL, OBJETIVO, TÉCNICO e CIENTÍFICO. 
-   - PROIBIDO o uso de pronomes na primeira/segunda pessoa para o pet (você, seu).
-   - PROIBIDO saudações informais ou conversas diretas com o animal (ex: NUNCA escreva "Ei Rex", "Parece que você...").
-   - PROIBIDO uso de exclamações emocionais ou emojis.
-   - Refira-se ao animal estritamente como "o paciente", "o animal", ou "o espécime ${petContext.name}".
-3. ESTRUTURA DO LAUDO (Exatamente 3 parágrafos densos, separados por dupla quebra de linha "\\n\\n"):
-   [Parágrafo 1 - Evolução Clínica e Sinais Vitais] Avalie os logs e o chat. Use jargão médico como "normorexia", "hiporexia", "letargia", "eutimia", "estabilidade comportamental". Sintetize a curva de energia e humor da semana de forma pericial e cronológica.
-   [Parágrafo 2 - Parecer Nutricional e Metabólico] Examine os scans. Emita um parecer nutrológico técnico relacionando o alimento ingerido ao porte (${petContext.weight} kg), idade e raça (${petContext.breed}). Detalhe a adequação de macronutrientes, balanço energético e potenciais riscos ao trato gastrointestinal.
-   [Parágrafo 3 - Plano Profilático e Prognóstico] Conclua com diretrizes médicas preditivas. Aponte fatores de risco morfofisiológicos cruzados com os achados da semana. Prescreva recomendações preventivas severas de forma autoritária.`;
+        // 2. DYNAMIC SYSTEM PROMPT
+        const systemPrompt = `You are an elite Veterinary AI Diagnostician. Your task is to generate a clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name} weighing ${petContext.weight}kg.
+
+STRICT RULES:
+1. NO HALLUCINATIONS: Base your report EXCLUSIVELY on the provided logs and chat history below.
+2. NEW PATIENT PROTOCOL: If the "Recent Logs" and "Chat History" are empty, DO NOT invent a 7-day history. Instead, write an "Initial Baseline Assessment" focusing on expected characteristics, dietary needs, and preventive care for a ${petContext.age}-year-old ${petContext.breed}.
+3. FORMATTING: Output clean, readable text. DO NOT use markdown like ** or #. Use standard paragraph breaks.
+
+--- DATA INJECTION ---
+Recent Daily Logs: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs recorded yet.')}
+Recent Chat History: ${JSON.stringify(chatHistory.length > 0 ? chatHistory : 'No chat history recorded yet.')}
+`;
 
         const result = await Promise.race([
-            analyzeProactiveHealth(prompt),
+            analyzeProactiveHealth(systemPrompt),
             new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
         ]);
 
@@ -247,7 +262,7 @@ HISTÓRICO DO CHAT DE TRIAGEM: ${JSON.stringify(chatHistory)}
         });
     } catch (e) {
         console.error("Weekly Report Error:", e);
-        res.json({ summary: "Status: Estável. Atualize os registros para ver mais." });
+        res.json({ summary: "Status: Baseline evaluation recorded. Awaiting more data." });
     }
 });
 

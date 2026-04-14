@@ -250,6 +250,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!session) throw new Error("No active session");
                 const user = session.user;
 
+                // 1. Guarantee the public Profile exists before attaching a pet
+                const { error: profileError } = await window.supabaseClient.from('profiles').upsert({ 
+                    id: user.id,
+                    email: user.email || ''
+                }, { onConflict: 'id' });
+
+                if (profileError) {
+                    console.error("Profile initialization error:", profileError);
+                    throw new Error("Não foi possível inicializar o perfil do usuário.");
+                }
+
                 const payload = {
                     owner_id: user.id,
                     name: petNameInput.value,
@@ -272,6 +283,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 btn.textContent = i18n.saving;
+                // 2. Proceed with the Pet Insert
                 const { data, error: insertError } = await window.supabaseClient.from('pets').insert([payload]).select().single();
                 if (insertError) throw insertError;
 
