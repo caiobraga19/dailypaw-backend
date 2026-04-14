@@ -208,61 +208,63 @@ app.post("/api/generate-weekly-report", async (req, res) => {
         const limitCheck = await enforcePremiumAccess(userId);
         if (!limitCheck.allowed) return res.status(403).json({ error: limitCheck.error });
 
+        // Define a janela de tempo de 7 dias
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const isoDate = sevenDaysAgo.toISOString();
 
-        let recentLogs = [];
-        let chatLogs = [];
+        // 1. OMNI-CHANNEL HARVESTING: Puxando TODAS as interações do usuário de uma vez
+        const [logsRes, chatRes, scansRes, remindersRes] = await Promise.all([
+            supabaseAdmin.from('daily_logs').select('energy, appetite, mood, created_at').eq('pet_id', petContext.id).gte('created_at', isoDate).order('created_at', { ascending: false }),
+            supabaseAdmin.from('chat_logs').select('role, message, created_at').eq('pet_id', petContext.id).gte('created_at', isoDate).order('created_at', { ascending: false }).limit(20),
+            supabaseAdmin.from('food_scans').select('detected_food, safety_status, created_at').eq('pet_id', petContext.id).gte('created_at', isoDate).order('created_at', { ascending: false }),
+            supabaseAdmin.from('reminders').select('title, type, date').eq('pet_id', petContext.id).gte('created_at', isoDate)
+        ]);
 
-        try {
-            if (petContext.id) {
-                const { data: logsData } = await supabaseAdmin.from('daily_logs')
-                    .select('*')
-                    .eq('pet_id', petContext.id)
-                    .gte('created_at', sevenDaysAgo.toISOString())
-                    .order('created_at', { ascending: false });
-                recentLogs = logsData || [];
-            }
-        } catch (err) { }
+        const recentLogs = logsRes.data || [];
+        const chatLogs = chatRes.data || [];
+        const recentScans = scansRes.data || [];
+        const recentReminders = remindersRes.data || [];
 
-        try {
-            // CORREÇÃO: Lendo da tabela correta 'chat_logs'
-            const { data: chatData } = await supabaseAdmin.from('chat_logs')
-                .select('*')
-                .eq('pet_id', petContext.id)
-                .order('created_at', { ascending: false })
-                .limit(50);
-            chatLogs = chatData || [];
-        } catch (err) { }
-
-        const isColdStart = recentLogs.length === 0 && chatLogs.length === 0;
+        // 2. REGRA DO COLD START GLOBAL
+        const isColdStart = recentLogs.length === 0 && chatLogs.length === 0 && recentScans.length === 0;
         let reportText = "";
 
         if (isColdStart) {
-            reportText = `The profile for ${petContext.name} was recently created. The Clinical AI is currently monitoring physiological parameters and awaiting further daily logs and chat interactions to establish a comprehensive baseline report.`;
+            reportText = `The profile for ${petContext.name} was recently created. The Clinical AI is currently monitoring physiological parameters and awaiting further daily logs, food scans, and chat interactions to establish a comprehensive baseline report.`;
         } else {
-            const systemPrompt = `You are an elite Veterinary AI. Generate a concise, 1-paragraph clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}. 
-STRICT RULES:
-1. ZERO HALLUCINATIONS: Base it ONLY on the data below.
-2. CRITICAL ALERT: If the chat history shows emergencies (e.g., dying, pain, blood), state this as a severe clinical warning.
-3. NO MARKDOWN: Output 100% plain text. No asterisks (**).
+            // 3. PROMPT DE SÍNTESE HOLÍSTICA (O "Médico Chefe")
+            const systemPrompt = `You are an elite Veterinary AI Chief Medical Officer. Generate a comprehensive but concise 1-paragraph clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}.
 
---- DATA INJECTION ---
-Recent Daily Tracking: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs')}
-Recent Chat History: ${JSON.stringify(chatLogs.length > 0 ? chatLogs : 'No chats')}
+STRICT RULES:
+1. HOLISTIC ANALYSIS: You must synthesize ALL provided data (Tracking, Chats, Food Scans, and Reminders). Connect the dots. For example, if a toxic food was scanned and the pet later had low energy, mention the correlation.
+2. CHRONOLOGICAL AWARENESS: Recognize resolutions. If a health scare in the chat was later resolved by the user in a newer message, state clearly that the scare was resolved and the pet is stable.
+3. NO MARKDOWN: Output 100% plain text. No asterisks (**), no bolding, no hashtags.
+4. TONE: Professional, reassuring, and deeply analytical.
+
+--- PATIENT CHART (LAST 7 DAYS) ---
+Daily Health Tracking: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No daily tracking data')}
+AI Chat Interactions: ${JSON.stringify(chatLogs.length > 0 ? chatLogs : 'No chat interactions')}
+Food & Nutrition Scans: ${JSON.stringify(recentScans.length > 0 ? recentScans : 'No food scanned')}
+Medical/Care Reminders: ${JSON.stringify(recentReminders.length > 0 ? recentReminders : 'No reminders set')}
 `;
+
+            // 4. CHAMADA DA IA
             const result = await Promise.race([
-                analyzeProactiveHealth(`${systemPrompt}\n\nDO NOT USE MARKDOWN ASTERISKS.`),
+                analyzeProactiveHealth(`${systemPrompt}\n\nRemember: 1 plain text paragraph synthesizing EVERYTHING. NO MARKDOWN.`),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000))
             ]);
-            reportText = result.insight || result.text || "Data processed.";
+
+            reportText = result.insight || result.text || "Patient data processed successfully.";
+
+            // Sanitização brutal para garantir a UI limpa
             reportText = reportText.replace(/\*/g, '');
         }
 
         res.json({ summary: reportText, isPremiumTier: true });
     } catch (e) {
         console.error("Weekly Report Error:", e);
-        res.json({ summary: "Status: Baseline evaluation recorded. Awaiting more data." });
+        res.json({ summary: "Status: Baseline evaluation recorded. Awaiting more data to synthesize a full report." });
     }
 });
 
