@@ -239,16 +239,16 @@ app.post("/api/generate-weekly-report", async (req, res) => {
         } catch (err) { console.error("Warn: No chat_history table or error", err.message); }
 
         // 2. DYNAMIC SYSTEM PROMPT
-        const systemPrompt = `You are an elite Veterinary AI Diagnostician. Your task is to generate a clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name} weighing ${petContext.weight}kg.
+        const systemPrompt = `You are an elite Veterinary AI. Your task is to generate a clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}.
 
-STRICT RULES:
-1. NO HALLUCINATIONS: Base your report EXCLUSIVELY on the provided logs and chat history below.
-2. NEW PATIENT PROTOCOL: If the "Recent Logs" and "Chat History" are empty, DO NOT invent a 7-day history. Instead, write an "Initial Baseline Assessment" focusing on expected characteristics, dietary needs, and preventive care for a ${petContext.age}-year-old ${petContext.breed}.
-3. FORMATTING: Output clean, readable text. DO NOT use markdown like ** or #. Use standard paragraph breaks.
+STRICT RULES (FAILURE IS NOT AN OPTION):
+1. ZERO HALLUCINATIONS: Base your report EXCLUSIVELY on the data provided below. Do not invent habits, routines, or clinical signs.
+2. THE "COLD START" RULE (CRITICAL): If the 'Recent Daily Logs' and 'Recent Chat History' are empty or represent less than 24 hours of data, your entire response must be a MAXIMUM of 2 to 3 concise sentences. Simply acknowledge that ${petContext.name}'s profile was just initialized and state that the AI is waiting for more daily logs and chat interactions to establish a clinical baseline. DO NOT perform a physiological analysis.
+3. NO MARKDOWN: You are strictly forbidden from using Markdown formatting. DO NOT use asterisks (**), bolding, hashtags (#), or bullet points. Output 100% plain, readable text with standard paragraph breaks.
 
 --- DATA INJECTION ---
-Recent Daily Logs: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs recorded yet.')}
-Recent Chat History: ${JSON.stringify(chatHistory.length > 0 ? chatHistory : 'No chat history recorded yet.')}
+Recent Daily Logs: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No logs yet.')}
+Recent Chat History: ${JSON.stringify(chatHistory.length > 0 ? chatHistory : 'No chat history yet.')}
 `;
 
         const result = await Promise.race([
