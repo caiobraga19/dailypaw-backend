@@ -595,27 +595,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let level = 'stable', badgeText = 'Everything Normal', mainMessage = i18n.health_normal;
 
+        // --- SISTEMA DE DISMISS (MEMÓRIA DO ALERTA) ---
+        // Pega o timestamp de quando o usuário dispensou o alerta pela última vez para este pet
+        const dismissedAlerts = JSON.parse(localStorage.getItem('dailyPaw_dismissedAlerts') || '{}');
+        const lastDismissedTime = dismissedAlerts[pet.id] || 0;
+
         const recentLogs = dailyLogs || [];
         const recentChats = chatLogs || [];
+        const recentScans = scans || [];
 
-        // 1. CHECAGEM DE EMERGÊNCIA NO CHAT (Palavras Críticas)
-        // Vasculha as mensagens do usuário atrás de sinais de emergência
-        const isEmergencyChat = recentChats.some(msg =>
-            msg.role === 'user' &&
-            /morrendo|sangue|dor|vomit|socorro|emergency|dying|blood|pain|help|urgente/i.test(msg.message || msg.text || '')
-        );
+        // Filtra os dados para analisar APENAS o que aconteceu DEPOIS do último botão de "Dismiss"
+        const newChats = recentChats.filter(msg => new Date(msg.created_at).getTime() > lastDismissedTime);
+        const newLogs = recentLogs.filter(log => new Date(log.created_at).getTime() > lastDismissedTime);
+        const newScans = recentScans.filter(scan => new Date(scan.created_at).getTime() > lastDismissedTime);
 
-        // 2. CHECAGEM DO DAILY TRACKING IMEDIATA (Não espera 2 dias mais)
-        const hasRecentLow = recentLogs.length > 0 && (recentLogs[0].appetite === 'Low' || recentLogs[0].energy === 'Low' || recentLogs[0].appetite === 'low' || recentLogs[0].energy === 'low');
+        // 1. CHECAGEM CRONOLÓGICA INTELIGENTE (Nos dados não dispensados)
+        let isEmergencyChat = false;
+        const emergencyWords = /morrendo|sangue|dor|vômito|vomit|socorro|emergency|dying|blood|pain|help|urgente/i;
+        const resolutionWords = /já está bem|ja esta bem|melhorou|ok|falso alarme|fine|better|safe|recuperou|passou/i;
 
-        // LÓGICA DE DECISÃO
+        for (const msg of newChats) {
+            if (msg.role === 'user') {
+                const text = msg.message || msg.text || '';
+                if (resolutionWords.test(text)) break;
+                if (emergencyWords.test(text)) {
+                    isEmergencyChat = true;
+                    break;
+                }
+            }
+        }
+
+        // 2. CHECAGEM DO DAILY TRACKING IMEDIATA
+        const hasRecentLow = newLogs.length > 0 && (newLogs[0].appetite === 'Low' || newLogs[0].energy === 'Low' || newLogs[0].appetite === 'low' || newLogs[0].energy === 'low');
+
+        // 3. LÓGICA DE DECISÃO
         if (isEmergencyChat) {
             level = 'critical';
             badgeText = 'CRITICAL ALERT';
-            mainMessage = '⚠️ Urgent: Emergency terms detected in your recent chat. Immediate veterinary evaluation is strongly recommended.';
-            insightContainer.style.backgroundColor = '#FEF2F2'; // Fundo vermelho
+            mainMessage = '⚠️ Urgent: Unresolved emergency detected in chat. Immediate veterinary evaluation is strongly recommended.';
+            insightContainer.style.backgroundColor = '#FEF2F2';
             insightContainer.style.borderLeft = '4px solid #EF4444';
-        } else if (scans && scans.some(s => s.safety_status === 'dangerous' || s.safety_status === 'TOXIC')) {
+        } else if (newScans.some(s => s.safety_status === 'dangerous' || s.safety_status === 'TOXIC')) {
             level = 'critical';
             badgeText = 'TOXICITY ALERT';
             mainMessage = '⚠️ Warning: Recently scanned food was flagged as highly dangerous or toxic.';
@@ -625,13 +645,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             level = 'advisory';
             badgeText = 'Observation Required';
             mainMessage = '🔍 Warning: Recent tracking indicates low energy or appetite today. Keep an eye on your pet.';
+            insightContainer.style.backgroundColor = '#FFFBEB';
+            insightContainer.style.borderLeft = '4px solid #F59E0B';
+        } else {
+            insightContainer.style.backgroundColor = '#ECFDF5';
+            insightContainer.style.borderLeft = '4px solid #10B981';
         }
 
         const levelClass = level === 'critical' ? 'danger' : (level === 'advisory' ? 'warning' : 'success');
         insightBadge.className = `status-pill ${levelClass}`;
         insightBadge.textContent = badgeText.toUpperCase();
+
+        // 4. RENDERIZANDO O BOTÃO DE DISMISS (Apenas se houver alerta)
+        let dismissBtnHtml = '';
+        if (level !== 'stable') {
+            dismissBtnHtml = `
+                <button id="dismiss-alert-btn" style="background: none; border: none; font-size: 0.8rem; font-weight: 600; color: #6B7280; text-decoration: underline; cursor: pointer; margin-top: 10px; display: inline-block; padding: 0; text-align: left; transition: color 0.2s;">
+                    Dismiss Alert
+                </button>
+            `;
+        }
+
         insightContainer.className = `insight-box ${level}`;
-        insightContainer.innerHTML = `<p style="color: ${level === 'critical' ? '#B91C1C' : 'inherit'}; font-weight: ${level === 'critical' ? '600' : 'normal'};">${mainMessage}</p>`;
+        insightContainer.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <p style="color: ${level === 'critical' ? '#B91C1C' : (level === 'advisory' ? '#B45309' : '#065F46')}; font-weight: ${level === 'critical' ? '600' : 'normal'}; margin: 0;">${mainMessage}</p>
+                ${dismissBtnHtml}
+            </div>
+        `;
+
+        // 5. ATIVANDO O CLIQUE DO BOTÃO
+        const dismissBtn = document.getElementById('dismiss-alert-btn');
+        if (dismissBtn) {
+            dismissBtn.onclick = () => {
+                // Salva a data e hora exata do clique
+                const currentAlerts = JSON.parse(localStorage.getItem('dailyPaw_dismissedAlerts') || '{}');
+                currentAlerts[pet.id] = Date.now();
+                localStorage.setItem('dailyPaw_dismissedAlerts', JSON.stringify(currentAlerts));
+
+                // Roda a função de novo em frações de segundo para a tela ficar verde instantaneamente
+                proactiveHealthGuard(dailyLogs, chatLogs, scans, pet);
+            };
+        }
     }
 
     // --- RESTAURAÇÃO DO BANNER DO RELATÓRIO SEMANAL ---
