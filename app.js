@@ -628,8 +628,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const existingReport = reports && reports.length > 0 ? reports[0] : null;
 
             if (existingReport) {
-                const formattedHtml = existingReport.summary.split('\\n\\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\\n/g, '<br>')}</p>`).join('');
-                reportContainer.innerHTML = `<div class="ai-report-formatted">${formattedHtml}</div>`;
+                const normalizedText = existingReport.summary.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n'); 
+                const formattedHtml = normalizedText.split('\n\n').map(p => `<p class="weekly-report-paragraph" style="margin-bottom: 12px; line-height: 1.6; color: #4A5568;">${p.replace(/\n/g, '<br>')}</p>`).join('');
+                
+                reportContainer.innerHTML = `
+                    <div class="ai-report-formatted">${formattedHtml}</div>
+                    <button id="regenerate-report-btn" class="btn-ai-premium" style="margin-top: 16px; background: none; border: 1px solid #d1d5db; color: #4b5563; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        Refresh Insights
+                    </button>
+                `;
             } else {
                 reportContainer.innerHTML = `
                     <div class="ai-report-placeholder-premium" style="text-align: center; padding: 20px;">
@@ -876,10 +884,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- RESTAURAÇÃO DO BANNER NO BOTÃO DE GERAR RELATÓRIO ---
         document.addEventListener('click', async (e) => {
-            if (e.target && e.target.id === 'generate-report-btn') {
-                const btn = e.target;
+            if (e.target && (e.target.id === 'generate-report-btn' || e.target.closest('#regenerate-report-btn'))) {
+                const btn = e.target.id === 'generate-report-btn' ? e.target : e.target.closest('#regenerate-report-btn');
                 btn.disabled = true;
-                btn.innerHTML = `<span>⏳</span> ${i18n.analyzing}`;
+                btn.innerHTML = `<span>⏳</span> ${i18n.analyzing || "Analyzing..."}`;
                 try {
                     const logs = await window.supabaseClient.from('daily_logs').select('*').eq('pet_id', activePetId).limit(7);
                     const scansData = await window.supabaseClient.from('food_scans').select('*').eq('pet_id', activePetId).limit(5);
