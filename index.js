@@ -237,10 +237,11 @@ app.post("/api/generate-weekly-report", async (req, res) => {
             const systemPrompt = `You are an elite Veterinary AI Chief Medical Officer. Generate a comprehensive but concise 1-paragraph clinical status report for a ${petContext.age}-year-old ${petContext.breed} named ${petContext.name}.
 
 STRICT RULES:
-1. HOLISTIC ANALYSIS: You must synthesize ALL provided data (Tracking, Chats, Food Scans, and Reminders). Connect the dots. For example, if a toxic food was scanned and the pet later had low energy, mention the correlation.
-2. CHRONOLOGICAL AWARENESS: Recognize resolutions. If a health scare in the chat was later resolved by the user in a newer message, state clearly that the scare was resolved and the pet is stable.
-3. NO MARKDOWN: Output 100% plain text. No asterisks (**), no bolding, no hashtags.
-4. TONE: Professional, reassuring, and deeply analytical.
+1. HOLISTIC ANALYSIS: Synthesize ALL provided data (Tracking, Chats, Food Scans, and Reminders). Connect the dots between diet and behavior.
+2. CHRONOLOGICAL AWARENESS: Recognize resolutions. If a health scare was reported but later resolved, state the pet is currently stable.
+3. NO MARKDOWN: Output 100% plain text. Absolutely NO asterisks (**), hashtags (#), or bolding.
+4. TONE: Professional, reassuring, and analytical.
+5. NO PRECISE TIMESTAMPS: You are strictly forbidden from including specific hours, minutes, or seconds. Do not write things like "00:35:56". Use natural time references like "today", "yesterday", "early this morning", or simply the date like "April 14".
 
 --- PATIENT CHART (LAST 7 DAYS) ---
 Daily Health Tracking: ${JSON.stringify(recentLogs.length > 0 ? recentLogs : 'No daily tracking data')}
