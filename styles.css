@@ -5274,4 +5274,56 @@ footer p {
 .author-meta {
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+/* ========================= */
+/* Footer                    */
+/* ========================= */
+footer {
+    background: var(--text-color);
+    padding: 48px 24px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.footer-content p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+}
+
+.footer-contact {
+    margin-bottom: 4px;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6B7280;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+    color: #10B981;
+}
+
+.contact-link svg {
+    flex-shrink: 0;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.contact-link:hover svg {
+    transform: translateY(-1px);
 }
