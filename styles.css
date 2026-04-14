@@ -5033,4 +5033,136 @@ footer p {
 .verification-subtext {
     color: var(--text-muted);
     font-size: 0.95rem;
+}
+
+/* Comparison Section */
+.comparison {
+    padding: 100px 24px;
+    background-color: #f9fbfb;
+}
+
+.section-badge {
+    color: #10B981;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 40px auto 0;
+}
+
+@media (min-width: 992px) {
+    .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.comparison-card {
+    background: #FFFFFF;
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 48px 32px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s ease;
+}
+
+.card-limited {
+    opacity: 0.85;
+}
+
+.card-limited .list-content {
+    opacity: 0.7;
+}
+
+.card-premium {
+    border: 2px solid #10B981;
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.1);
+    transform: scale(1.02);
+}
+
+.premium-badge {
+    position: absolute;
+    top: -14px;
+    right: 32px;
+    background: linear-gradient(135deg, #065F46, #10B981);
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.comparison-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.comparison-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.icon-muted {
+    background: #F3F4F6;
+    color: #9CA3AF;
+}
+
+.icon-vibrant {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.comparison-card h3 {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.comparison-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.comparison-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.icon-cross { color: #9CA3AF; flex-shrink: 0; margin-top: 3px; }
+.icon-check { color: #10B981; flex-shrink: 0; margin-top: 3px; }
+
+.list-content {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+.list-content strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
 }
