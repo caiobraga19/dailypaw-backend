@@ -158,9 +158,9 @@ p {
 .hero-btns {
     display: flex;
     gap: 1.25rem;
+    /* Slightly larger gap for premium spacing */
     margin-top: 2rem;
     align-items: center;
-    justify-content: center;
 }
 
 .nav-auth {
@@ -240,68 +240,29 @@ p {
     max-width: 1200px;
     margin: 0 auto;
     padding: 80px 24px 0;
+    /* Add top padding to account for fixed navbar */
     z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.main-headline {
-    font-size: 3rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #065F46; /* Deeper Teal Green from our palette */
-    text-align: center;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 24px;
-}
-
-.hero-text.floating-hero-card {
-    background-color: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 50px 40px;
-    box-shadow: 0 25px 50px -12px rgba(6, 95, 70, 0.15);
-    max-width: 650px;
-    margin-left: auto;
-    margin-right: auto;
-    animation: floatAnimation 6s ease-in-out infinite;
-}
-
-.hero-text.floating-hero-card .subtitle {
-    color: #4b5563; /* Gray 600 for contrast on white */
-    text-shadow: none;
-    margin: 0 auto 24px auto;
-    text-align: center;
-}
-
-.hero-text.floating-hero-card .hero-btns .btn-outline {
-    color: #065F46 !important;
-    border-color: rgba(6, 95, 70, 0.3) !important;
-}
-
-@keyframes floatAnimation {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
 }
 
 .hero-text {
-    text-align: center;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 600px;
 }
 
 .hero-text h1 {
-    color: inherit;
+    color: #FFFFFF;
     background: none;
-    -webkit-text-fill-color: initial;
-    text-shadow: none;
-    text-align: center;
+    -webkit-text-fill-color: #FFFFFF;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.hero-text .subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin: 0 0 24px 0;
+    text-align: left;
 }
 
 /* Hero Price Pill */
@@ -315,7 +276,7 @@ p {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     padding: 12px 20px;
-    margin: 0 auto 12px auto;
+    margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
