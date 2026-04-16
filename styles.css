@@ -1176,61 +1176,163 @@ footer p {
         padding: 40px 24px 80px;
     }
 
-    /* --- HORIZONTAL SNAP-SCROLL CAROUSEL (MOBILE) --- */
-    .comparison-grid,
-    .testimonials-grid,
-    .steps-container {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 16px;
-        padding-bottom: 24px;
-        margin-left: -24px;
-        margin-right: -24px;
-        padding-left: 24px;
-        padding-right: 24px;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
-    }
-
-    .comparison-grid::-webkit-scrollbar,
-    .testimonials-grid::-webkit-scrollbar,
-    .steps-container::-webkit-scrollbar {
-        display: none; /* Chrome/Safari/Opera */
+    /* --- COMPACT SIDE-BY-SIDE CARDS (MOBILE) --- */
+    .comparison-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 32px;
+        overflow: visible;
     }
 
     .comparison-card {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        padding: 36px 28px;
+        padding: 20px 14px;
+        border-radius: 20px;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .comparison-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .comparison-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .comparison-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .comparison-card h3 {
+        font-size: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .comparison-list {
+        gap: 12px;
+    }
+
+    .comparison-list li {
+        gap: 6px;
+    }
+
+    .icon-cross svg,
+    .icon-check svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .list-content {
+        font-size: 0.7rem;
+        line-height: 1.4;
+    }
+
+    .list-content strong {
+        font-size: 0.72rem;
+        margin-bottom: 2px;
     }
 
     .card-premium {
         transform: none;
+        border-width: 2px;
     }
 
     .card-premium:hover {
         transform: none;
     }
 
+    /* Testimonials: 3 cards in a row */
+    .testimonials-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 32px;
+        overflow: visible;
+    }
+
     .testimonial-card {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        flex: none;
+        padding: 16px 12px;
+        border-radius: 16px;
+        min-width: 0;
+        max-width: none;
+        flex: unset;
+    }
+
+    .testimonial-stars svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .testimonial-stars {
+        margin-bottom: 10px;
+    }
+
+    .testimonial-text {
+        font-size: 0.65rem;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .testimonial-footer {
+        gap: 8px;
+        padding-top: 10px;
+    }
+
+    .testimonial-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .testimonial-avatar svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .author-name {
+        font-size: 0.65rem;
+    }
+
+    .author-meta {
+        font-size: 0.55rem;
+    }
+
+    /* Steps: 2x2 grid */
+    .steps-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 32px;
+        overflow: visible;
+        flex-wrap: wrap;
     }
 
     .step-item {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        flex: none;
+        min-width: 0;
+        max-width: none;
+        flex: unset;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .step-item h3 {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+
+    .step-item p {
+        font-size: 0.75rem;
+        line-height: 1.4;
     }
 
     .pricing-grid {
@@ -5376,64 +5478,29 @@ footer {
 }
 
 /* ================================================ */
-/* MOBILE HORIZONTAL SNAP-SCROLL CAROUSEL OVERRIDES */
+/* COMPACT MOBILE OVERRIDES                         */
 /* Must come AFTER all base grid definitions to     */
-/* properly override flex-wrap: wrap on mobile.     */
+/* properly override flex-wrap on mobile.           */
 /* ================================================ */
 @media (max-width: 768px) {
-    .comparison-grid,
-    .testimonials-grid,
+    .comparison-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        overflow: visible;
+    }
+
+    .testimonials-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        overflow: visible;
+    }
+
     .steps-container {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 16px;
-        padding-bottom: 24px;
-        margin-left: -24px;
-        margin-right: -24px;
-        padding-left: 24px;
-        padding-right: 24px;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .comparison-grid::-webkit-scrollbar,
-    .testimonials-grid::-webkit-scrollbar,
-    .steps-container::-webkit-scrollbar {
-        display: none;
-    }
-
-    .comparison-card {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        padding: 36px 28px;
-    }
-
-    .card-premium {
-        transform: none;
-    }
-
-    .card-premium:hover {
-        transform: none;
-    }
-
-    .testimonial-card {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        flex: none;
-    }
-
-    .step-item {
-        min-width: 85vw;
-        max-width: 85vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
-        flex: none;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        overflow: visible;
     }
 }
