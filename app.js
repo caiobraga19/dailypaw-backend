@@ -1101,7 +1101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         window.handleUpgrade = () => {
-            window.location.href = `https://buy.stripe.com/test_14A3cucDceUU8UE2Hm5c400?client_reference_id=${user.id}`;
+            window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${user.id}`;
         };
 
         window.handleCancelSubscription = async () => {
