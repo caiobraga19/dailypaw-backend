@@ -344,48 +344,50 @@
                 <p>One powerful plan. Everything your pet needs to thrive.</p>
             </div>
 
-            <!-- Billing Toggle (Pill Design) -->
+            <!-- Pulse Animation for Save Badge -->
+            <style>
+                @keyframes badgePulse {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+                    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+                }
+                .save-badge-pulse { animation: badgePulse 2s ease-in-out infinite; }
+            </style>
+
+            <!-- Billing Toggle (Pill Design — Annual Default) -->
             <div class="reveal" style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 48px;">
-                <div id="billing-pill" style="display: inline-flex; align-items: center; background: #F0F0F0; border-radius: 40px; padding: 4px; position: relative; cursor: pointer; user-select: none; gap: 0;">
-                    <div id="pill-slider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
-                    <span id="toggle-label-monthly" style="position: relative; z-index: 2; padding: 10px 28px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); transition: color 0.3s ease; cursor: pointer; white-space: nowrap;">Monthly</span>
-                    <span id="toggle-label-annual" style="position: relative; z-index: 2; padding: 10px 28px; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">Annual <span id="save-badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.02em; white-space: nowrap; line-height: 1;">Save 20%</span></span>
+                <div id="billing-pill" style="display: inline-flex; align-items: center; background: #EDECEA; border-radius: 40px; padding: 4px; position: relative; cursor: pointer; user-select: none; gap: 0;">
+                    <div id="pill-slider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 36px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; transform: translateX(100%);"></div>
+                    <span id="toggle-label-monthly" style="position: relative; z-index: 2; padding: 11px 30px; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease, font-weight 0.3s ease; cursor: pointer; white-space: nowrap;">Monthly</span>
+                    <span id="toggle-label-annual" style="position: relative; z-index: 2; padding: 11px 30px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); transition: color 0.3s ease, font-weight 0.3s ease; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">Annual <span id="save-badge" class="save-badge-pulse" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.02em; white-space: nowrap; line-height: 1;">SAVE 20%</span></span>
                 </div>
             </div>
 
-            <input type="checkbox" id="billing-toggle" style="display: none;">
+            <!-- Hidden toggle state (default: annual = checked) -->
+            <input type="checkbox" id="billing-toggle" checked style="display: none;">
 
             <div class="pricing-grid reveal-stagger" style="display: flex; justify-content: center;">
-                <!-- Premium Plan -->
                 <div class="pricing-card premium" style="max-width: 480px; width: 100%;">
-                    <div class="popular-badge">All-Inclusive</div>
+                    <div class="popular-badge" style="background: linear-gradient(135deg, var(--accent-forest) 0%, #166534 100%);">Most Popular</div>
                     <div class="plan-header">
                         <h3>DailyPaw AI+</h3>
                         <div class="price-wrapper">
-                            <span class="old-price" id="pricing-old-price">$16.99</span>
-                            <div class="price" id="pricing-amount" style="transition: opacity 0.25s ease;">$12.99 <span class="period" id="pricing-period">/ month</span></div>
+                            <span class="old-price" id="pricing-old-price">$12.99</span>
+                            <div class="price" id="pricing-amount" style="transition: opacity 0.25s ease;">$10.49 <span class="period">/ mo</span></div>
                         </div>
-                        <p class="plan-desc" id="pricing-billing-note" style="font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; min-height: 1.4em; transition: opacity 0.25s ease;">Billed monthly. Cancel anytime.</p>
+                        <p class="plan-desc" id="pricing-billing-note" style="font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; min-height: 1.4em; transition: opacity 0.25s ease;">Billed annually at $125.99. Cancel anytime.</p>
                     </div>
                     <ul class="feature-list">
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
-                                AI Chat & Help</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
-                                AI Food Scans</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
-                                Daily Tracking</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Weekly
-                                Professional Reports</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Smart
-                                Clinical Guard (Alerts)</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
-                                Pet Registration</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited
-                                Task Reminders</strong></li>
-                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Advanced
-                                Medical Diagnostics</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited AI Chat & Help</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited AI Food Scans</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited Daily Tracking</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Weekly Professional Reports</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Smart Clinical Guard (Alerts)</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited Pet Registration</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Unlimited Task Reminders</strong></li>
+                        <li><span class="icon check" style="background: #10B981; color: white;"></span><strong>Advanced Medical Diagnostics</strong></li>
                     </ul>
-                    <a href="#" data-auth="signup" data-plan="premium" id="pricing-cta-btn" class="btn-primary" style="text-align: center;">Start AI+ Experience — $12.99/mo</a>
+                    <a href="#" data-auth="signup" data-plan="premium" id="pricing-cta-btn" class="btn-primary" style="text-align: center; display: block;">Get Annual — Save 20%</a>
+                    <p style="text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 14px; letter-spacing: 0.01em;">🔒 Secure checkout powered by Stripe. Cancel anytime.</p>
                 </div>
             </div>
         </section>
@@ -399,30 +401,29 @@
             const toggle       = document.getElementById('billing-toggle');
             const labelMonthly = document.getElementById('toggle-label-monthly');
             const labelAnnual  = document.getElementById('toggle-label-annual');
-            const saveBadge    = document.getElementById('save-badge');
             const oldPrice     = document.getElementById('pricing-old-price');
             const priceAmount  = document.getElementById('pricing-amount');
             const billingNote  = document.getElementById('pricing-billing-note');
             const ctaBtn       = document.getElementById('pricing-cta-btn');
             const pillSlider   = document.getElementById('pill-slider');
 
-            function updatePricing() {
+            function updatePricing(animate) {
                 const isAnnual = toggle.checked;
 
-                // Animate price fade
-                priceAmount.style.opacity = '0';
-                billingNote.style.opacity = '0';
+                if (animate) {
+                    priceAmount.style.opacity = '0';
+                    billingNote.style.opacity = '0';
+                }
 
-                setTimeout(() => {
+                const apply = () => {
                     if (isAnnual) {
-                        oldPrice.textContent = '$155.88';
-                        priceAmount.innerHTML = '$125.99 <span class="period">/ year</span>';
-                        billingNote.textContent = 'Billed annually at $125.99. That\'s ~$10.50/mo!';
-                        ctaBtn.textContent = 'Start AI+ Experience — $125.99/yr';
+                        oldPrice.textContent = '$12.99';
+                        priceAmount.innerHTML = '$10.49 <span class="period">/ mo</span>';
+                        billingNote.textContent = 'Billed annually at $125.99. Cancel anytime.';
+                        ctaBtn.textContent = 'Get Annual \u2014 Save 20%';
                         ctaBtn.setAttribute('data-checkout-link', annualLink);
                         localStorage.setItem('selectedCheckoutLink', annualLink);
 
-                        // Pill visual states
                         pillSlider.style.transform = 'translateX(100%)';
                         labelMonthly.style.color = 'var(--text-muted)';
                         labelMonthly.style.fontWeight = '500';
@@ -430,31 +431,31 @@
                         labelAnnual.style.fontWeight = '600';
                     } else {
                         oldPrice.textContent = '$16.99';
-                        priceAmount.innerHTML = '$12.99 <span class="period">/ month</span>';
+                        priceAmount.innerHTML = '$12.99 <span class="period">/ mo</span>';
                         billingNote.textContent = 'Billed monthly. Cancel anytime.';
-                        ctaBtn.textContent = 'Start AI+ Experience — $12.99/mo';
+                        ctaBtn.textContent = 'Start Monthly \u2014 $12.99/mo';
                         ctaBtn.setAttribute('data-checkout-link', monthlyLink);
                         localStorage.setItem('selectedCheckoutLink', monthlyLink);
 
-                        // Pill visual states
                         pillSlider.style.transform = 'translateX(0)';
                         labelMonthly.style.color = 'var(--text-color)';
                         labelMonthly.style.fontWeight = '600';
                         labelAnnual.style.color = 'var(--text-muted)';
                         labelAnnual.style.fontWeight = '500';
                     }
-
                     priceAmount.style.opacity = '1';
                     billingNote.style.opacity = '1';
-                }, 180);
+                };
+
+                animate ? setTimeout(apply, 180) : apply();
             }
 
-            // Set initial state
-            ctaBtn.setAttribute('data-checkout-link', monthlyLink);
+            // Initialize with annual (no animation flash)
+            updatePricing(false);
 
-            // Clicking labels toggles
-            labelMonthly.addEventListener('click', () => { toggle.checked = false; updatePricing(); });
-            labelAnnual.addEventListener('click', () => { toggle.checked = true; updatePricing(); });
+            // Clicking labels toggles (with animation)
+            labelMonthly.addEventListener('click', () => { toggle.checked = false; updatePricing(true); });
+            labelAnnual.addEventListener('click', () => { toggle.checked = true; updatePricing(true); });
         })();
         </script>
 
