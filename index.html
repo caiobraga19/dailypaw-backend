@@ -554,6 +554,57 @@
                     letter-spacing: 0.01em;
                 }
 
+                /* Toggle Switch (Chavinha) */
+                .dp-toggle-wrap {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 14px;
+                }
+                .dp-toggle-label {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    transition: color 0.3s ease, font-weight 0.3s ease;
+                    user-select: none;
+                }
+                .dp-toggle-label.active {
+                    color: var(--text-color);
+                    font-weight: 600;
+                }
+                .dp-switch {
+                    position: relative;
+                    width: 52px;
+                    height: 28px;
+                    cursor: pointer;
+                    flex-shrink: 0;
+                }
+                .dp-switch-track {
+                    position: absolute;
+                    inset: 0;
+                    background: #D1D5DB;
+                    border-radius: 28px;
+                    transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .dp-switch-track.on {
+                    background: var(--accent-forest);
+                }
+                .dp-switch-knob {
+                    position: absolute;
+                    top: 3px;
+                    left: 3px;
+                    width: 22px;
+                    height: 22px;
+                    background: #FFFFFF;
+                    border-radius: 50%;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .dp-switch-knob.on {
+                    transform: translateX(24px);
+                }
+
                 @media (max-width: 520px) {
                     .dp-features { grid-template-columns: 1fr; gap: 10px; }
                     .dp-card-body { padding: 32px 24px 28px; }
@@ -562,12 +613,15 @@
                 }
             </style>
 
-            <!-- Billing Toggle -->
+            <!-- Billing Toggle (Chavinha) -->
             <div class="reveal" style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 40px;">
-                <div id="billing-pill" style="display: inline-flex; align-items: center; background: #EDECEA; border-radius: 40px; padding: 4px; position: relative; cursor: pointer; user-select: none;">
-                    <div id="pill-slider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 36px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; transform: translateX(100%);"></div>
-                    <span id="toggle-label-monthly" style="position: relative; z-index: 2; padding: 11px 30px; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease, font-weight 0.3s ease; cursor: pointer; white-space: nowrap;">Monthly</span>
-                    <span id="toggle-label-annual" style="position: relative; z-index: 2; padding: 11px 30px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); transition: color 0.3s ease, font-weight 0.3s ease; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">Annual <span id="save-badge" class="save-badge-pulse" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.02em; white-space: nowrap; line-height: 1;">SAVE 20%</span></span>
+                <div class="dp-toggle-wrap">
+                    <span id="toggle-label-monthly" class="dp-toggle-label">Monthly</span>
+                    <div class="dp-switch" id="billing-switch">
+                        <div class="dp-switch-track on" id="switch-track"></div>
+                        <div class="dp-switch-knob on" id="switch-knob"></div>
+                    </div>
+                    <span id="toggle-label-annual" class="dp-toggle-label active" style="display: inline-flex; align-items: center; gap: 8px;">Annual <span id="save-badge" class="save-badge-pulse" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.02em; white-space: nowrap; line-height: 1;">SAVE 20%</span></span>
                 </div>
             </div>
 
@@ -635,7 +689,9 @@
             const priceAmount  = document.getElementById('pricing-amount');
             const billingNote  = document.getElementById('pricing-billing-note');
             const ctaBtn       = document.getElementById('pricing-cta-btn');
-            const pillSlider   = document.getElementById('pill-slider');
+            const switchTrack  = document.getElementById('switch-track');
+            const switchKnob   = document.getElementById('switch-knob');
+            const billingSwitch = document.getElementById('billing-switch');
 
             function updatePricing(animate) {
                 const isAnnual = toggle.checked;
@@ -654,11 +710,10 @@
                         ctaBtn.setAttribute('data-checkout-link', annualLink);
                         localStorage.setItem('selectedCheckoutLink', annualLink);
 
-                        pillSlider.style.transform = 'translateX(100%)';
-                        labelMonthly.style.color = 'var(--text-muted)';
-                        labelMonthly.style.fontWeight = '500';
-                        labelAnnual.style.color = 'var(--text-color)';
-                        labelAnnual.style.fontWeight = '600';
+                        switchTrack.classList.add('on');
+                        switchKnob.classList.add('on');
+                        labelMonthly.classList.remove('active');
+                        labelAnnual.classList.add('active');
                     } else {
                         oldPrice.textContent = '$16.99';
                         priceAmount.innerHTML = '$12.99<span class="dp-period"> /mo</span>';
@@ -667,11 +722,10 @@
                         ctaBtn.setAttribute('data-checkout-link', monthlyLink);
                         localStorage.setItem('selectedCheckoutLink', monthlyLink);
 
-                        pillSlider.style.transform = 'translateX(0)';
-                        labelMonthly.style.color = 'var(--text-color)';
-                        labelMonthly.style.fontWeight = '600';
-                        labelAnnual.style.color = 'var(--text-muted)';
-                        labelAnnual.style.fontWeight = '500';
+                        switchTrack.classList.remove('on');
+                        switchKnob.classList.remove('on');
+                        labelMonthly.classList.add('active');
+                        labelAnnual.classList.remove('active');
                     }
                     priceAmount.style.opacity = '1';
                     billingNote.style.opacity = '1';
@@ -682,6 +736,10 @@
 
             updatePricing(false);
 
+            billingSwitch.addEventListener('click', () => {
+                toggle.checked = !toggle.checked;
+                updatePricing(true);
+            });
             labelMonthly.addEventListener('click', () => { toggle.checked = false; updatePricing(true); });
             labelAnnual.addEventListener('click', () => { toggle.checked = true; updatePricing(true); });
         })();
