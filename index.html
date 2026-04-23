@@ -344,19 +344,16 @@
                 <p>One powerful plan. Everything your pet needs to thrive.</p>
             </div>
 
-            <!-- Billing Toggle -->
-            <div class="billing-toggle-wrapper reveal" style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 48px;">
-                <span id="toggle-label-monthly" style="font-size: 0.95rem; font-weight: 600; color: var(--text-color); transition: color 0.3s ease;">Monthly</span>
-                
-                <label class="billing-switch" style="position: relative; display: inline-block; width: 56px; height: 30px; cursor: pointer; flex-shrink: 0;">
-                    <input type="checkbox" id="billing-toggle" style="opacity: 0; width: 0; height: 0;">
-                    <span class="billing-slider" style="position: absolute; inset: 0; background: #D1D5DB; border-radius: 30px; transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1);"></span>
-                    <span class="billing-knob" style="position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: #FFFFFF; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);"></span>
-                </label>
-
-                <span id="toggle-label-annual" style="font-size: 0.95rem; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease;">Annual</span>
-                <span id="save-badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.03em; white-space: nowrap; opacity: 0.5; transition: opacity 0.3s ease;">SAVE 20%</span>
+            <!-- Billing Toggle (Pill Design) -->
+            <div class="reveal" style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 48px;">
+                <div id="billing-pill" style="display: inline-flex; align-items: center; background: #F0F0F0; border-radius: 40px; padding: 4px; position: relative; cursor: pointer; user-select: none; gap: 0;">
+                    <div id="pill-slider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                    <span id="toggle-label-monthly" style="position: relative; z-index: 2; padding: 10px 28px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); transition: color 0.3s ease; cursor: pointer; white-space: nowrap;">Monthly</span>
+                    <span id="toggle-label-annual" style="position: relative; z-index: 2; padding: 10px 28px; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">Annual <span id="save-badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.02em; white-space: nowrap; line-height: 1;">Save 20%</span></span>
+                </div>
             </div>
+
+            <input type="checkbox" id="billing-toggle" style="display: none;">
 
             <div class="pricing-grid reveal-stagger" style="display: flex; justify-content: center;">
                 <!-- Premium Plan -->
@@ -405,11 +402,9 @@
             const saveBadge    = document.getElementById('save-badge');
             const oldPrice     = document.getElementById('pricing-old-price');
             const priceAmount  = document.getElementById('pricing-amount');
-            const period       = document.getElementById('pricing-period');
             const billingNote  = document.getElementById('pricing-billing-note');
             const ctaBtn       = document.getElementById('pricing-cta-btn');
-            const slider       = document.querySelector('.billing-slider');
-            const knob         = document.querySelector('.billing-knob');
+            const pillSlider   = document.getElementById('pill-slider');
 
             function updatePricing() {
                 const isAnnual = toggle.checked;
@@ -421,36 +416,32 @@
                 setTimeout(() => {
                     if (isAnnual) {
                         oldPrice.textContent = '$155.88';
-                        priceAmount.innerHTML = '$125.99 <span class="period" id="pricing-period">/ year</span>';
+                        priceAmount.innerHTML = '$125.99 <span class="period">/ year</span>';
                         billingNote.textContent = 'Billed annually at $125.99. That\'s ~$10.50/mo!';
                         ctaBtn.textContent = 'Start AI+ Experience — $125.99/yr';
                         ctaBtn.setAttribute('data-checkout-link', annualLink);
                         localStorage.setItem('selectedCheckoutLink', annualLink);
 
-                        // Toggle visual states
+                        // Pill visual states
+                        pillSlider.style.transform = 'translateX(100%)';
                         labelMonthly.style.color = 'var(--text-muted)';
                         labelMonthly.style.fontWeight = '500';
                         labelAnnual.style.color = 'var(--text-color)';
                         labelAnnual.style.fontWeight = '600';
-                        saveBadge.style.opacity = '1';
-                        slider.style.background = 'var(--accent-forest)';
-                        knob.style.transform = 'translateX(26px)';
                     } else {
                         oldPrice.textContent = '$16.99';
-                        priceAmount.innerHTML = '$12.99 <span class="period" id="pricing-period">/ month</span>';
+                        priceAmount.innerHTML = '$12.99 <span class="period">/ month</span>';
                         billingNote.textContent = 'Billed monthly. Cancel anytime.';
                         ctaBtn.textContent = 'Start AI+ Experience — $12.99/mo';
                         ctaBtn.setAttribute('data-checkout-link', monthlyLink);
                         localStorage.setItem('selectedCheckoutLink', monthlyLink);
 
-                        // Toggle visual states
+                        // Pill visual states
+                        pillSlider.style.transform = 'translateX(0)';
                         labelMonthly.style.color = 'var(--text-color)';
                         labelMonthly.style.fontWeight = '600';
                         labelAnnual.style.color = 'var(--text-muted)';
                         labelAnnual.style.fontWeight = '500';
-                        saveBadge.style.opacity = '0.5';
-                        slider.style.background = '#D1D5DB';
-                        knob.style.transform = 'translateX(0)';
                     }
 
                     priceAmount.style.opacity = '1';
@@ -461,9 +452,7 @@
             // Set initial state
             ctaBtn.setAttribute('data-checkout-link', monthlyLink);
 
-            toggle.addEventListener('change', updatePricing);
-
-            // Allow clicking the labels to toggle
+            // Clicking labels toggles
             labelMonthly.addEventListener('click', () => { toggle.checked = false; updatePricing(); });
             labelAnnual.addEventListener('click', () => { toggle.checked = true; updatePricing(); });
         })();
