@@ -468,27 +468,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
 
-                document.getElementById('global-checkout-btn').addEventListener('click', async function () {
-                    this.textContent = "Gerando Checkout Seguro...";
+                document.getElementById('global-checkout-btn').addEventListener('click', function () {
+                    this.textContent = "Redirecting to Checkout...";
                     this.style.opacity = "0.7";
                     this.disabled = true;
-                    try {
-                        const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: user.id })
-                        });
-                        const data = await response.json();
-                        if (data.url) {
-                            window.location.href = data.url;
-                        } else {
-                            throw new Error("Falha ao gerar link.");
-                        }
-                    } catch (err) {
-                        this.textContent = "Erro. Tente novamente.";
-                        this.style.opacity = "1";
-                        this.disabled = false;
-                    }
+                    window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${user.id}`;
                 });
 
                 document.getElementById('logout-paywall-btn').addEventListener('click', async () => {

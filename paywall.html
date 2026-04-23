@@ -484,7 +484,7 @@
             // Checkout Handler
             checkoutBtn.addEventListener('click', async function (e) {
                 e.preventDefault();
-                this.innerHTML = '<div class="loader"></div> <span>Gerando Checkout Seguro...</span>';
+                this.innerHTML = '<div class="loader"></div> <span>Redirecting to Checkout...</span>';
                 this.style.opacity = "0.7";
                 this.disabled = true;
 
@@ -493,28 +493,13 @@
                     const { data: { session } } = await window.supabaseClient.auth.getSession();
                     const userId = session?.user?.id;
 
-                    if (!userId) throw new Error("Usuário não autenticado.");
+                    if (!userId) throw new Error("User not authenticated.");
 
-                    // 2. Call backend to generate intelligent Stripe session
-                    const API_BASE = 'https://dailypaw-api.onrender.com';
-
-                    const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userId: userId })
-                    });
-
-                    const data = await response.json();
-
-                    // 3. Redirect dynamically
-                    if (data.url) {
-                        window.location.href = data.url;
-                    } else {
-                        throw new Error("Falha ao gerar link.");
-                    }
+                    // 2. Redirect directly to Live Stripe Payment Link
+                    window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${userId}`;
                 } catch (err) {
                     console.error(err);
-                    this.innerHTML = '<span>Erro. Tente novamente.</span>';
+                    this.innerHTML = '<span>Error. Try again.</span>';
                     this.style.opacity = "1";
                     this.disabled = false;
                 }
