@@ -515,8 +515,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // 1. Fetch fresh pet count purely from Database (Ignore Stale Memory)
                 const { data: dbPets } = await window.supabaseClient.from('pets').select('id').eq('owner_id', user.id);
 
-                // 2. Break the Loop
-                if (dbPets && dbPets.length > 0 && !isAddingNew) {
+                // 2. Break the Loop (but NEVER redirect if user just paid — they must onboard)
+                if (dbPets && dbPets.length > 0 && !isAddingNew && !justUpgraded) {
                     window.location.replace('/dashboard');
                     return; // Halt execution and escape loop
                 } else {
