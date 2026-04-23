@@ -472,7 +472,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     this.textContent = "Redirecting to Checkout...";
                     this.style.opacity = "0.7";
                     this.disabled = true;
-                    window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${user.id}`;
+                    const defaultLink = 'https://buy.stripe.com/fZu3cueMW1hU7ur7ltbAs02';
+                    const checkoutLink = localStorage.getItem('selectedCheckoutLink') || defaultLink;
+                    window.location.href = `${checkoutLink}?client_reference_id=${user.id}`;
                 });
 
                 document.getElementById('logout-paywall-btn').addEventListener('click', async () => {
@@ -1085,7 +1087,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         window.handleUpgrade = () => {
-            window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${user.id}`;
+            const defaultLink = 'https://buy.stripe.com/fZu3cueMW1hU7ur7ltbAs02';
+            const checkoutLink = localStorage.getItem('selectedCheckoutLink') || defaultLink;
+            window.location.href = `${checkoutLink}?client_reference_id=${user.id}`;
         };
 
         window.handleCancelSubscription = async () => {

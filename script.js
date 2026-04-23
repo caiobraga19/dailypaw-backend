@@ -92,10 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const mode = trigger.getAttribute('data-auth');
             const plan = trigger.getAttribute('data-plan');
+            const checkoutLink = trigger.getAttribute('data-checkout-link');
 
             if (plan) {
                 localStorage.setItem('selectedPlan', plan);
                 console.log(`DailyPaw Auth: Plan '${plan}' captured via direct click.`);
+            }
+            if (checkoutLink) {
+                localStorage.setItem('selectedCheckoutLink', checkoutLink);
+                console.log(`DailyPaw Auth: Checkout link captured -> ${checkoutLink}`);
             }
 
             switchAuthMode(mode);
@@ -331,7 +336,9 @@ window.handlePostSignupUpgrade = () => {
         alert("User ID missing. Try logging in first.");
         return;
     }
-    window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${window.pendingUserId}`;
+    const defaultLink = 'https://buy.stripe.com/fZu3cueMW1hU7ur7ltbAs02';
+    const checkoutLink = localStorage.getItem('selectedCheckoutLink') || defaultLink;
+    window.location.href = `${checkoutLink}?client_reference_id=${window.pendingUserId}`;
 };
 
 // --- Global Auth Listener (Cross-Tab Sync & OAuth) ---

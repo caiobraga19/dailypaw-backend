@@ -495,8 +495,10 @@
 
                     if (!userId) throw new Error("User not authenticated.");
 
-                    // 2. Redirect directly to Live Stripe Payment Link
-                    window.location.href = `https://buy.stripe.com/28E5kCgV4aSu2a7fRZbAs00?client_reference_id=${userId}`;
+                    // 2. Redirect directly to Live Stripe Payment Link (respects monthly/annual selection)
+                    const defaultLink = 'https://buy.stripe.com/fZu3cueMW1hU7ur7ltbAs02';
+                    const checkoutLink = localStorage.getItem('selectedCheckoutLink') || defaultLink;
+                    window.location.href = `${checkoutLink}?client_reference_id=${userId}`;
                 } catch (err) {
                     console.error(err);
                     this.innerHTML = '<span>Error. Try again.</span>';
